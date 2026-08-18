@@ -43,11 +43,15 @@
             </Setter>
         </Style>
     </DataTemplate.Resources>
-    <Grid ClipToBounds="True" MinWidth="0" MinHeight="0">
+    <Grid ClipToBounds="True" MinWidth="0" MinHeight="0" Background="WhiteSmoke">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="16"/>
-            <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="12"/>
+                    <RowDefinition Height="Auto"/>
+                     <RowDefinition Height="12"/>
+                     <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <wv2:WebView2 x:Name="Browser"
@@ -81,6 +85,10 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="16"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="12"/>
+                        <RowDefinition Height="Auto"/>
+                         <RowDefinition Height="12"/>
+                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <TextBox Grid.Row="0" Text="{Binding WebOutput}" IsReadOnly="True"
                              Height="96" Padding="8,4" TextWrapping="Wrap"
@@ -106,6 +114,23 @@
                         <Button Grid.Column="4" Command="{Binding CopyWebCommand}"
                                 Content="复制命令" Style="{StaticResource DshButtonStyle}"/>
                     </Grid>
+                    <CheckBox Grid.Row="4" IsChecked="{Binding AutoLoadPlugin}"
+                              Content="自动加载 Visual Studio Harness 插件"
+                              HorizontalAlignment="Left"
+                              ToolTip="启动 DSH Web UI 时自动安装并加载本地 Visual Studio 插件"/>
+                     <StackPanel Grid.Row="6">
+                         <TextBlock Text="运行环境：" FontWeight="SemiBold"/>
+                         <TextBlock Text="{Binding EnvironmentStatus}" Margin="0,4,0,8"
+                                    TextWrapping="Wrap"/>
+                          <WrapPanel>
+                             <Button Command="{Binding CheckEnvironmentCommand}" Content="重新检查"
+                                     Margin="0,0,8,0" Style="{StaticResource DshButtonStyle}"/>
+                             <Button Command="{Binding InstallNodeCommand}" Content="安装 Node.js"
+                                     Margin="0,0,8,0" Style="{StaticResource DshButtonStyle}"/>
+                             <Button Command="{Binding InstallDshCommand}" Content="安装 DSH"
+                                     Style="{StaticResource DshButtonStyle}"/>
+                          </WrapPanel>
+                     </StackPanel>
                 </Grid>
             </Grid>
         </Border>
@@ -138,7 +163,7 @@
                            VerticalAlignment="Center"/>
                 <TextBlock Grid.Column="6" Text="{Binding WebProcessId}"
                            VerticalAlignment="Center"/>
-                <TextBlock Grid.Column="8" Text="DSH 路径：" Padding="8,4" />
+                <TextBlock Grid.Column="8" Text="DSH 路径：" Padding="8,4" VerticalAlignment="Center"/>
                 <TextBox Grid.Column="10" Text="{Binding DshPath}" IsReadOnly="True"
                          MaxWidth="320" Padding="8,4" VerticalContentAlignment="Center"
                          ToolTip="DSH 命令可执行程序或脚本的所在位置"
@@ -148,5 +173,6 @@
                 </Grid>
             </ScrollViewer>
         </Border>
+
     </Grid>
 </DataTemplate>

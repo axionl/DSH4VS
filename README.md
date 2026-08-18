@@ -78,6 +78,6 @@ DSH4VS/
    │  ├─ DSHAskContext.cs              # 采集 DTE 上下文（解决方案/文件/选中）
    │  └─ OutputPane.cs                 # “输出 → DSH”面板
    └─ UI/
-      ├─ PromptDialog.xaml(.cs)        # 任务输入对话框
-      └─ DSHWebWindow(.Control).xaml(.cs)  # WebView2 工具窗口
+      ├─      └─ DSHWebWindow(.Control).xaml(.cs)  # WebView2 工具窗口
 ```
+

@@ -4,8 +4,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.Win32;
 
 namespace DSH4VS.Core
 {
@@ -54,6 +56,11 @@ namespace DSH4VS.Core
     /// </summary>
     public static class DshLocator
     {
+        static DshLocator()
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        }
+
         #region CLI 定位
 
         /// <summary>
@@ -97,10 +104,9 @@ namespace DSH4VS.Core
         }
 
         /// <summary>
-        /// 定位用于启动 Web UI 的 npx 调用。Web profile 使用 npx 的包解析方式，
-        /// 避免直接调用缓存中的 dsh 入口与当前安装版本不一致。
+        /// 定位用于调用 DSH CLI 的 npx 基础命令，供 profile 管理和启动复用。
         /// </summary>
-        public static DshExecutable LocateWeb()
+        public static DshExecutable LocateNpx()
         {
             var npx = FindNpxPath();
             return npx == null
@@ -108,9 +114,33 @@ namespace DSH4VS.Core
                 : new DshExecutable
                 {
                     FileName = npx,
-                    ArgumentsPrefix = "--yes @deepseek-ai/dsh web",
-                    Display = npx + " --yes @deepseek-ai/dsh web"
+                    ArgumentsPrefix = "--yes @deepseek-ai/dsh",
+                    Display = npx + " --yes @deepseek-ai/dsh"
                 };
+        }
+
+        /// <summary>定位用于启动 DSH Web UI 的 npx 调用。</summary>
+        /// <param name="profileName">需要启动的 profile 名称；为空时使用默认 Web profile。</param>
+        public static DshExecutable LocateWeb(string profileName = null)
+        {
+            var dsh = LocateNpx();
+            if (dsh == null)
+            {
+                return null;
+            }
+
+            if (string.IsNullOrWhiteSpace(profileName))
+            {
+                dsh.ArgumentsPrefix += " web";
+                dsh.Display += " web";
+            }
+            else
+            {
+                dsh.ArgumentsPrefix += " --profile " + profileName;
+                dsh.Display += " --profile " + profileName;
+            }
+
+            return dsh;
         }
 
         #endregion
@@ -122,15 +152,13 @@ namespace DSH4VS.Core
         /// </summary>
         public static async Task<DshEnvironmentStatus> CheckEnvironmentAsync()
         {
-            var status = new DshEnvironmentStatus
-            {
-                HasDsh = Locate() != null
-            };
-
+            var status = new DshEnvironmentStatus();
             var dsh = Locate();
             if (dsh != null)
             {
-                status.DshVersion = await RunVersionAsync(dsh.FileName);
+                status.DshVersion = await RunVersionAsync(dsh.FileName,
+                    dsh.ArgumentsPrefix + (string.IsNullOrWhiteSpace(dsh.ArgumentsPrefix) ? "--version" : " --version"));
+                status.HasDsh = true;
             }
 
             var node = FindNodePath();
@@ -249,7 +277,13 @@ namespace DSH4VS.Core
         /// <returns>版本文本；执行失败时返回空值。</returns>
         private static async Task<string> RunVersionAsync(string fileName)
         {
-            var result = await RunProcessAsync(fileName, "--version");
+            return await RunVersionAsync(fileName, "--version");
+        }
+
+        /// <summary>执行带前置参数的版本查询，例如 node.exe 加载 DSH bin.js。</summary>
+        private static async Task<string> RunVersionAsync(string fileName, string arguments)
+        {
+            var result = await RunProcessAsync(fileName, arguments);
             return result.ExitCode == 0 && !string.IsNullOrWhiteSpace(result.Output)
                 ? result.Output.Trim()
                 : null;
@@ -274,29 +308,58 @@ namespace DSH4VS.Core
                         UseShellExecute = false,
                         CreateNoWindow = true,
                         RedirectStandardOutput = true,
-                        RedirectStandardError = true,
-                        StandardOutputEncoding = System.Text.Encoding.UTF8,
-                        StandardErrorEncoding = System.Text.Encoding.UTF8
+                        RedirectStandardError = true
                     }
                 })
                 {
                     if (!process.Start())
                         return new ProcessResult { ExitCode = -1, Error = "无法启动进程。" };
 
-                    var outputTask = process.StandardOutput.ReadToEndAsync();
-                    var errorTask = process.StandardError.ReadToEndAsync();
+                    var outputTask = ReadProcessStreamAsync(process.StandardOutput.BaseStream);
+                    var errorTask = ReadProcessStreamAsync(process.StandardError.BaseStream);
                     await Task.WhenAll(outputTask, errorTask, Task.Run(() => process.WaitForExit()));
                     return new ProcessResult
                     {
                         ExitCode = process.ExitCode,
-                        Output = await outputTask,
-                        Error = await errorTask
+                        Output = DecodeProcessOutput(await outputTask),
+                        Error = DecodeProcessOutput(await errorTask)
                     };
                 }
             }
+
             catch (Exception ex)
             {
                 return new ProcessResult { ExitCode = -1, Error = ex.Message };
+            }
+        }
+
+        /// <summary>读取外部进程的原始输出，避免 StreamReader 提前使用错误的代码页。</summary>
+        private static async Task<byte[]> ReadProcessStreamAsync(Stream stream)
+        {
+            using (var buffer = new MemoryStream())
+            {
+                await stream.CopyToAsync(buffer);
+                return buffer.ToArray();
+            }
+        }
+
+        /// <summary>优先按 UTF-8 解码，遇到 Windows 本地代码页时回退到 GB18030。</summary>
+        private static string DecodeProcessOutput(byte[] bytes)
+        {
+            if (bytes == null || bytes.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            var utf8 = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false,
+                throwOnInvalidBytes: true);
+            try
+            {
+                return utf8.GetString(bytes);
+            }
+            catch (DecoderFallbackException)
+            {
+                return Encoding.GetEncoding(936).GetString(bytes);
             }
         }
 
@@ -359,7 +422,7 @@ namespace DSH4VS.Core
         /// <param name="fileName">需要查找的文件名。</param>
         private static string FindOnPath(string fileName)
         {
-            var path = Environment.GetEnvironmentVariable("PATH") ?? "";
+            var path = string.Join(Path.PathSeparator.ToString(), GetEffectivePathValues());
             foreach (var rawDir in path.Split(';'))
             {
                 var dir = rawDir.Trim().Trim('"');
@@ -372,6 +435,37 @@ namespace DSH4VS.Core
                 catch { /* ignore unreadable entries */ }
             }
             return null;
+        }
+
+        /// <summary>合并扩展进程 PATH 与用户/计算机环境变量中的最新 PATH。</summary>
+        private static IEnumerable<string> GetEffectivePathValues()
+        {
+            var values = new List<string>
+            {
+                Environment.GetEnvironmentVariable("PATH") ?? string.Empty,
+                Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.User) ?? string.Empty,
+                Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine) ?? string.Empty
+            };
+
+            try
+            {
+                using (var userKey = Registry.CurrentUser.OpenSubKey(@"Environment"))
+                {
+                    values.Add(userKey?.GetValue("Path") as string ?? string.Empty);
+                }
+
+                using (var machineKey = Registry.LocalMachine.OpenSubKey(
+                    @"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"))
+                {
+                    values.Add(machineKey?.GetValue("Path") as string ?? string.Empty);
+                }
+            }
+            catch
+            {
+                // 注册表不可访问时仍使用进程环境变量。
+            }
+
+            return values;
         }
 
         /// <summary>查找 node.exe 的安装路径。</summary>
@@ -397,7 +491,11 @@ namespace DSH4VS.Core
             return new[]
             {
                 Path.Combine(programFiles, "nodejs"),
-                Path.Combine(programFilesX86, "nodejs")
+                Path.Combine(programFilesX86, "nodejs"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "nodejs"),
+                Environment.GetEnvironmentVariable("NVM_SYMLINK"),
+                Environment.GetEnvironmentVariable("NVM_HOME"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "nvm", "current")
             }.Where(Directory.Exists);
         }
 

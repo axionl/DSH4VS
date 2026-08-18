@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.Serialization;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -20,15 +19,15 @@ namespace DSH4VS.UI
         #region 私有字段
 
         private string detail = "正在检查 DSH Web UI…";
-        
+
         private Visibility browserVisibility = Visibility.Collapsed;
-        
+
         private Visibility overlayVisibility = Visibility.Visible;
-        
+
         private bool isStarting;
-        
+
         private string browserSource = DshRunner.WebUrl;
-        
+
         private string webAddress = DshRunner.WebUrl;
 
         private string dshVersion = "版本：检查中…";
@@ -39,11 +38,19 @@ namespace DSH4VS.UI
 
         private string webOutput = "等待启动 DSH Web UI…";
 
+        private bool autoLoadPlugin = true;
+
         private string webProcessId = "进程 ID：未知";
 
         private string dshPath = "检查中…";
 
+        private string environmentStatus = "正在检查 Node.js、npx 和 DSH 环境…";
+
         private readonly VisualStudioExtensibility extensibility;
+
+        private static IClientContext latestClientContext;
+
+        private IClientContext clientContext;
 
         #endregion
 
@@ -51,12 +58,47 @@ namespace DSH4VS.UI
 
         /// <summary>初始化 DSH Web 窗口数据上下文和启动命令。</summary>
         /// <param name="extensibility">扩展入口提供的 VisualStudioExtensibility 对象。</param>
-        public DshWebWindowViewModel(VisualStudioExtensibility extensibility)
+        /// <param name="clientContext">打开工具窗口时的 Visual Studio 客户端上下文。</param>
+        public DshWebWindowViewModel(VisualStudioExtensibility extensibility,
+            IClientContext clientContext)
         {
             this.extensibility = extensibility;
+            this.clientContext = clientContext ?? latestClientContext;
             StartWebCommand = new AsyncCommand(StartWebAsync);
             StopWebCommand = new AsyncCommand(StopWebAsync);
             CopyWebCommand = new AsyncCommand(CopyWebCommandAsync);
+            CheckEnvironmentCommand = new AsyncCommand(CheckEnvironmentAsync);
+            InstallNodeCommand = new AsyncCommand(InstallNodeAsync);
+            InstallDshCommand = new AsyncCommand(InstallDshAsync);
+        }
+
+        /// <summary>显示 Node.js、npx 和 DSH CLI 的环境检测结果。</summary>
+        [DataMember]
+        public string EnvironmentStatus
+        {
+            get => environmentStatus;
+            private set => SetProperty(ref environmentStatus, value);
+        }
+
+        /// <summary>是否在启动 Web UI 时自动安装并加载 Visual Studio Harness 插件。</summary>
+        [DataMember]
+        public bool AutoLoadPlugin
+        {
+            get => autoLoadPlugin;
+            set
+            {
+                if (SetProperty(ref autoLoadPlugin, value))
+                {
+                    UpdateWebConfiguration();
+                }
+            }
+        }
+
+        /// <summary>更新工具窗口复用时使用的最新 Visual Studio 客户端上下文。</summary>
+        /// <param name="context">当前 Visual Studio 客户端上下文。</param>
+        public static void SetLatestClientContext(IClientContext context)
+        {
+            latestClientContext = context;
         }
 
         /// <summary>DSH Web UI 监听端口，默认值为 3080。</summary>
@@ -177,6 +219,18 @@ namespace DSH4VS.UI
         [DataMember]
         public IAsyncCommand CopyWebCommand { get; }
 
+        /// <summary>重新检查 Node.js、npx 和 DSH CLI 环境。</summary>
+        [DataMember]
+        public IAsyncCommand CheckEnvironmentCommand { get; }
+
+        /// <summary>下载安装 Node.js。</summary>
+        [DataMember]
+        public IAsyncCommand InstallNodeCommand { get; }
+
+        /// <summary>通过 npx 安装 DSH CLI。</summary>
+        [DataMember]
+        public IAsyncCommand InstallDshCommand { get; }
+
         #endregion
 
         #region Web UI 初始化与启动
@@ -188,9 +242,18 @@ namespace DSH4VS.UI
         {
             try
             {
+                // 保留环境检查在窗口加载生命周期中执行，确保打开窗口即可看到检测结果。
+                await CheckEnvironmentAsync(null, cancellationToken);
                 var output = await OutputPane.GetAsync(extensibility, cancellationToken);
                 if (TryGetWebPort(out var port) && await DshRunner.IsWebUpAsync(port))
                 {
+                    if (AutoLoadPlugin && clientContext != null)
+                    {
+                        DshContextBridge.Start(output);
+                        DshContextAutoSync.Start(extensibility, clientContext, output);
+                        await SynchronizeContextAsync(output, cancellationToken);
+                    }
+
                     await ShowBrowserAsync();
                 }
                 else
@@ -202,10 +265,52 @@ namespace DSH4VS.UI
                     output.WriteLine("[DSH] DSH Web UI 未运行，等待用户启动。");
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                Detail = "无法访问 DSH Web UI。请确认 Node.js 和 DSH 已安装。";
+                Detail = "无法访问 DSH Web UI：" + ex.Message;
             }
+        }
+
+        /// <summary>检查 Node.js、npx 和 DSH CLI，并更新工具窗口中的状态和按钮。</summary>
+        private async Task CheckEnvironmentAsync(object parameter, CancellationToken cancellationToken)
+        {
+            EnvironmentStatus = "正在检查 Node.js、npx 和 DSH 环境…";
+            var status = await DshLocator.CheckEnvironmentAsync();
+            EnvironmentStatus = (status.HasNode ? "Node.js " + status.NodeVersion : "未找到 Node.js") + "；"
+                + (status.HasNpx ? "npx " + status.NpxVersion : "未找到 npx") + "；"
+                + (status.HasDsh ? "已找到 DSH " + status.DshVersion : "未找到 DSH");
+            DshPath = DshLocator.Locate()?.Display ?? "未找到";
+            DshVersion = string.IsNullOrWhiteSpace(status.DshVersion)
+                ? "版本：未知"
+                : "版本：" + status.DshVersion;
+        }
+
+        /// <summary>下载安装 Node.js 并重新检查环境。</summary>
+        private async Task InstallNodeAsync(object parameter, CancellationToken cancellationToken)
+        {
+            EnvironmentStatus = "正在从 Node.js 官方源下载安装包，请稍候…";
+            var error = await DshLocator.InstallNodeJsAsync();
+            if (!string.IsNullOrWhiteSpace(error))
+            {
+                EnvironmentStatus = error;
+                return;
+            }
+
+            await CheckEnvironmentAsync(null, cancellationToken);
+        }
+
+        /// <summary>通过 npx 安装 DSH CLI 并重新检查环境。</summary>
+        private async Task InstallDshAsync(object parameter, CancellationToken cancellationToken)
+        {
+            EnvironmentStatus = "正在通过 npx 安装 @deepseek-ai/dsh，请稍候…";
+            var error = await DshLocator.InstallDshAsync();
+            if (!string.IsNullOrWhiteSpace(error))
+            {
+                EnvironmentStatus = error;
+                return;
+            }
+
+            await CheckEnvironmentAsync(null, cancellationToken);
         }
 
         /// <summary>启动 dsh web 服务，并在服务就绪后显示浏览器。</summary>
@@ -226,6 +331,10 @@ namespace DSH4VS.UI
                 }
 
                 var availablePort = DshRunner.FindAvailableWebPort(port);
+                if (port == DshContextBridge.Port)
+                {
+                    availablePort = DshRunner.FindAvailableWebPort(port + 1);
+                }
                 if (availablePort == 0)
                 {
                     Detail = "没有可用的 Web UI 端口。";
@@ -242,13 +351,27 @@ namespace DSH4VS.UI
 
                 UpdateWebConfiguration();
                 var output = await OutputPane.GetAsync(extensibility, cancellationToken);
-                await DshRunner.StartWebAsync(new CompositeOutput(output, AppendWebOutput), port);
-                if (await DshRunner.IsWebUpAsync(port))
+                if (AutoLoadPlugin && clientContext != null)
                 {
+                    DshContextBridge.Start(output);
+                    DshContextAutoSync.Start(extensibility, clientContext, output);
+                    await SynchronizeContextAsync(output, cancellationToken);
+                }
+
+                var actualPort = await DshRunner.StartWebAsync(
+                    new CompositeOutput(output, AppendWebOutput), port, AutoLoadPlugin);
+                if (actualPort > 0)
+                {
+                    if (actualPort != port)
+                    {
+                        WebPort = actualPort.ToString();
+                    }
+
                     await ShowBrowserAsync();
                 }
                 else
                 {
+                    DshContextAutoSync.Stop();
                     Detail = "启动失败。请确认 Node.js 和 DSH 已安装后重试。";
                     AppendWebOutput("[DSH] 启动失败。请确认 Node.js 和 DSH 已安装后重试。");
                 }
@@ -276,6 +399,7 @@ namespace DSH4VS.UI
                 var output = await OutputPane.GetAsync(extensibility, cancellationToken);
                 if (DshRunner.StopWeb())
                 {
+                    DshContextAutoSync.Stop();
                     output.WriteLine("[DSH] DSH Web UI 已停止。");
                     BrowserVisibility = Visibility.Collapsed;
                     OverlayVisibility = Visibility.Visible;
@@ -284,6 +408,7 @@ namespace DSH4VS.UI
                 }
                 else
                 {
+                    DshContextAutoSync.Stop();
                     Detail = "当前 Web UI 不是由本扩展启动，无法自动停止。";
                 }
             }
@@ -315,6 +440,24 @@ namespace DSH4VS.UI
         #endregion
 
         #region 辅助方法
+
+        /// <summary>立即同步一次当前 Visual Studio 上下文，不阻止 Web UI 启动。</summary>
+        /// <param name="output">输出通道。</param>
+        /// <param name="cancellationToken">取消标记。</param>
+        private async Task SynchronizeContextAsync(IDshOutput output,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                await DshContextBridge.SyncAsync(
+                    extensibility, clientContext, cancellationToken);
+                output.WriteLine("[DSH] 已在启动 Web UI 前自动同步 Visual Studio 上下文。");
+            }
+            catch (Exception ex)
+            {
+                output.WriteLine("[DSH] 自动同步 Visual Studio 上下文失败，继续启动 Web UI：" + ex.Message);
+            }
+        }
 
         /// <summary>将异常写入 DSH 输出窗格。</summary>
         /// <param name="message">异常上下文说明。</param>
@@ -349,14 +492,7 @@ namespace DSH4VS.UI
             WebProcessId = DshRunner.WebProcessId > 0
                 ? "进程 ID：" + DshRunner.WebProcessId
                 : "进程 ID：外部进程";
-            var executable = DshLocator.Locate();
-            DshPath = executable?.Display ?? "未找到";
-            DshVersion = "版本：检查中…";
-
-            var status = await DshLocator.CheckEnvironmentAsync();
-            DshVersion = string.IsNullOrWhiteSpace(status.DshVersion)
-                ? "版本：未知"
-                : "版本：" + status.DshVersion;
+            await CheckEnvironmentAsync(null, CancellationToken.None);
         }
 
         /// <summary>尝试读取并验证当前 Web UI 端口。</summary>
@@ -373,7 +509,9 @@ namespace DSH4VS.UI
         {
             var port = GetWebPortOrDefault();
             WebAddress = DshRunner.GetWebUrl(port);
-            WebCommand = $"npx --yes @deepseek-ai/dsh web --port {port}";
+            WebCommand = AutoLoadPlugin
+                ? $"npx --yes @deepseek-ai/dsh --profile dsh4vs --port {port}"
+                : $"npx --yes @deepseek-ai/dsh web --port {port}";
         }
 
         /// <summary>在单线程单元线程上写入系统剪贴板。</summary>

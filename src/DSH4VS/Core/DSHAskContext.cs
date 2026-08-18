@@ -28,6 +28,15 @@ namespace DSH4VS.Core
         /// <summary>当前编辑器中的选中文本。</summary>
         public string SelectionText { get; set; }
 
+        /// <summary>当前主光标所在的 1 起始行号。</summary>
+        public int CursorLine { get; set; }
+
+        /// <summary>当前主光标所在的 1 起始列号。</summary>
+        public int CursorColumn { get; set; }
+
+        /// <summary>当前主光标所在行的文本。</summary>
+        public string CurrentLineText { get; set; }
+
         /// <summary>DSH 使用的工作目录（其 cwd）。</summary>
         public string WorkspaceRoot
         {
@@ -96,9 +105,18 @@ namespace DSH4VS.Core
             {
                 var textView = await extensibility.Editor().GetActiveTextViewAsync(context, cancellationToken);
                 var selection = textView?.Selection;
-                if (selection != null && !selection.Value.IsEmpty)
+                if (selection != null)
                 {
-                    ctx.SelectionText = CopyToString(selection.Value.Extent);
+                    var primarySelection = selection.Value;
+                    var cursor = primarySelection.Start;
+                    var line = cursor.GetContainingLine();
+                    ctx.CursorLine = line.LineNumber + 1;
+                    ctx.CursorColumn = cursor - line.Text.Start + 1;
+                    ctx.CurrentLineText = CopyToString(line.Text);
+                    if (!primarySelection.IsEmpty)
+                    {
+                        ctx.SelectionText = CopyToString(primarySelection.Extent);
+                    }
                 }
             }
             catch

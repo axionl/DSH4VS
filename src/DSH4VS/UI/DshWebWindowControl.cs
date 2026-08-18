@@ -17,8 +17,9 @@ namespace DSH4VS.UI
 
         /// <summary>创建 DSH Web 远程控件及其数据上下文。</summary>
         /// <param name="extensibility">扩展入口提供的 VisualStudioExtensibility 对象。</param>
-        public DshWebWindowControl(VisualStudioExtensibility extensibility)
-            : base(dataContext: new DshWebWindowViewModel(extensibility))
+        public DshWebWindowControl(VisualStudioExtensibility extensibility,
+            IClientContext clientContext)
+            : base(dataContext: new DshWebWindowViewModel(extensibility, clientContext))
         {
             viewModel = (DshWebWindowViewModel)DataContext;
         }

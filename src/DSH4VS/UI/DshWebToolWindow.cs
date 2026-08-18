@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.Extensibility;
 using Microsoft.VisualStudio.Extensibility.ToolWindows;
 using Microsoft.VisualStudio.RpcContracts.RemoteUI;
+using DSH4VS.Core;
 
 namespace DSH4VS.UI
 {
@@ -12,6 +13,21 @@ namespace DSH4VS.UI
     [VisualStudioContribution]
     internal sealed class DshWebToolWindow : ToolWindow
     {
+        #region 上下文缓存
+
+        private static IClientContext clientContext;
+
+        /// <summary>保存打开 Web 窗口命令提供的客户端上下文。</summary>
+        /// <param name="context">当前 Visual Studio 客户端上下文。</param>
+        public static void SetClientContext(IClientContext context)
+        {
+            clientContext = context;
+            DshWebWindowViewModel.SetLatestClientContext(context);
+            DshContextAutoSync.UpdateContext(context);
+        }
+
+        #endregion
+
         #region 初始化
 
         /// <summary>初始化 DSH Web 工具窗口并设置窗口标题。</summary>
@@ -38,7 +54,8 @@ namespace DSH4VS.UI
         /// <param name="cancellationToken">内容创建的取消标记。</param>
         public override Task<IRemoteUserControl> GetContentAsync(CancellationToken cancellationToken)
         {
-            return Task.FromResult<IRemoteUserControl>(new DshWebWindowControl(Extensibility));
+            return Task.FromResult<IRemoteUserControl>(
+                new DshWebWindowControl(Extensibility, clientContext));
         }
 
         #endregion

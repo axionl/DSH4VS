@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using Microsoft.VisualStudio.Extensibility;
 using Microsoft.VisualStudio.Extensibility.Commands;
 using Microsoft.VisualStudio.Extensibility.Shell;
@@ -11,7 +10,7 @@ using DSH4VS.UI;
 namespace DSH4VS.Commands
 {
     /// <summary>
-    /// Ask DSH…：打开任务对话框并运行 DSH headless 任务。
+    /// Ask DSH…：同步当前上下文并打开 DSH Web UI。
     /// </summary>
     [VisualStudioContribution]
     internal sealed class AskDshCommand : Command
@@ -43,7 +42,69 @@ namespace DSH4VS.Commands
     }
 
     /// <summary>
-    /// Ask DSH about selection：在编辑器上下文菜单与工具菜单中针对选中文本提问。
+    /// Sync active document：将 Visual Studio 当前活动文档同步给 DSH。
+    /// </summary>
+    [VisualStudioContribution]
+    internal sealed class SyncDshDocumentCommand : Command
+    {
+        #region 命令配置
+
+        /// <summary>获取同步活动文档命令的显示名称和菜单位置。</summary>
+        public override CommandConfiguration CommandConfiguration =>
+            new("%DSH.Commands.SyncDshDocument.DisplayName%")
+            {
+                Placements = [CommandPlacement.KnownPlacements.ExtensionsMenu],
+                Icon = new CommandIconConfiguration(ImageMoniker.KnownValues.Document,
+                    IconSettings.None)
+            };
+
+        #endregion
+
+        #region 命令执行
+
+        /// <summary>捕获并同步当前活动文档。</summary>
+        public override Task ExecuteCommandAsync(IClientContext context,
+            CancellationToken cancellationToken)
+        {
+            return DshCommandLogic.SyncContextAsync(context, cancellationToken, "活动文档");
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Sync cursor position：将 Visual Studio 当前光标和选区位置同步给 DSH。
+    /// </summary>
+    [VisualStudioContribution]
+    internal sealed class SyncDshCursorCommand : Command
+    {
+        #region 命令配置
+
+        /// <summary>获取同步光标位置命令的显示名称和菜单位置。</summary>
+        public override CommandConfiguration CommandConfiguration =>
+            new("%DSH.Commands.SyncDshCursor.DisplayName%")
+            {
+                Placements = [CommandPlacement.KnownPlacements.ExtensionsMenu],
+                Icon = new CommandIconConfiguration(ImageMoniker.KnownValues.Select,
+                    IconSettings.None)
+            };
+
+        #endregion
+
+        #region 命令执行
+
+        /// <summary>捕获并同步当前光标位置和选区。</summary>
+        public override Task ExecuteCommandAsync(IClientContext context,
+            CancellationToken cancellationToken)
+        {
+            return DshCommandLogic.SyncContextAsync(context, cancellationToken, "光标位置");
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Ask DSH about selection：同步当前选中文本并打开 DSH Web UI。
     /// </summary>
     [VisualStudioContribution]
     internal sealed class AskDshSelectionCommand : Command
@@ -113,16 +174,13 @@ namespace DSH4VS.Commands
         {
             try
             {
+                DshWebToolWindow.SetClientContext(context);
                 await context.Extensibility.Shell().ShowToolWindowAsync<DshWebToolWindow>(
                     activate: true, cancellationToken);
             }
             catch (Exception ex)
             {
                 await DshCommandLogic.LogAsync(context, ex);
-                await DshCommandLogic.ShowErrorAsync(
-                    context,
-                    "无法打开 DSH Web UI。详细信息已写入“输出”窗口的 DSH 面板。\n\n" + ex.Message,
-                    cancellationToken);
             }
         }
 
@@ -194,46 +252,49 @@ namespace DSH4VS.Commands
     }
 
     /// <summary>
-    /// DSH 命令共享逻辑：获取输出窗格、捕获上下文并运行任务对话框。
+    /// DSH 命令共享逻辑：同步上下文并打开 DSH Web UI。
     /// </summary>
     internal static class DshCommandLogic
     {
         #region 任务执行
 
         /// <summary>
-        /// 获取 IDE 上下文，显示任务对话框并运行 DSH headless 任务。
+        /// 同步 IDE 上下文并显示 DSH Web 工具窗口，任务输入由 Web UI 承载。
         /// </summary>
         /// <param name="context">命令执行时的客户端上下文。</param>
-        /// <param name="forceSelection">是否强制包含当前选中文本。</param>
+        /// <param name="forceSelection">保留参数以兼容命令入口；Web UI 始终读取最新上下文。</param>
         /// <param name="cancellationToken">命令取消标记。</param>
         public static async Task RunAskAsync(IClientContext context,
             bool forceSelection, CancellationToken cancellationToken)
         {
             try
             {
-                var extensibility = context.Extensibility;
-                var output = await OutputPane.GetAsync(extensibility, cancellationToken);
-                var askContext = await DSHAskContext.FromClientContextAsync(
-                    extensibility, context, cancellationToken);
+                await SyncContextAsync(context, cancellationToken,
+                    forceSelection ? "选中文本" : "当前上下文");
+                DshWebToolWindow.SetClientContext(context);
+                await context.Extensibility.Shell().ShowToolWindowAsync<DshWebToolWindow>(
+                    activate: true, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                await LogAsync(context, ex);
+            }
+        }
 
-                var dialog = new PromptDialog(askContext, forceSelection)
-                {
-                    Owner = Application.Current?.MainWindow
-                };
-                dialog.ShowDialog();
-                if (dialog.DialogResult != true)
-                {
-                    return;
-                }
-
-                var taskText = dialog.BuildTaskText();
-                if (string.IsNullOrWhiteSpace(taskText))
-                {
-                    return;
-                }
-
-                await DshRunner.RunTaskAsync(output, taskText, askContext.WorkspaceRoot,
-                    new CancellationTokenSource());
+        /// <summary>捕获 Visual Studio 上下文并同步到 Harness bridge。</summary>
+        /// <param name="context">命令执行时的客户端上下文。</param>
+        /// <param name="cancellationToken">命令取消标记。</param>
+        /// <param name="kind">用于输出日志的同步类型。</param>
+        public static async Task SyncContextAsync(IClientContext context,
+            CancellationToken cancellationToken, string kind)
+        {
+            try
+            {
+                var output = await OutputPane.GetAsync(context.Extensibility, cancellationToken);
+                DshContextBridge.Start(output);
+                var askContext = await DshContextBridge.SyncAsync(
+                    context.Extensibility, context, cancellationToken);
+                output.WriteLine($"[DSH] 已同步{kind}: {askContext.FilePath ?? "无活动文档"}");
             }
             catch (Exception ex)
             {
@@ -258,24 +319,6 @@ namespace DSH4VS.Commands
             catch
             {
                 // 输出不可用时忽略
-            }
-        }
-
-        /// <summary>显示错误提示，并在提示不可用时记录异常。</summary>
-        /// <param name="context">命令执行时的客户端上下文。</param>
-        /// <param name="message">需要显示的错误信息。</param>
-        /// <param name="cancellationToken">提示框取消标记。</param>
-        internal static async Task ShowErrorAsync(IClientContext context, string message,
-            CancellationToken cancellationToken)
-        {
-            try
-            {
-                await context.Extensibility.Shell().ShowPromptAsync(message, PromptOptions.OK,
-                    cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                await LogAsync(context, ex);
             }
         }
 

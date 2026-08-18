@@ -32,4 +32,9 @@
 		<Page Remove="UI\DshWebWindowControl.xaml" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<TypeScriptCompile Remove="DshPlugin\**\*.ts" />
+		<Content Include="DshPlugin\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	</ItemGroup>
+
 </Project>

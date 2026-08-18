@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Diagnostics;
+using System.IO;
 using System.Net.Http;
 using System.Net;
 using System.Net.Sockets;
@@ -26,6 +27,10 @@ namespace DSH4VS.Core
         /// DSH Web UI 使用的本地端口。
         /// </summary>
         public const int WebPort = 3080;
+
+        /// <summary>Windows 命令行工具常用的系统代码页，用于读取 pnpm/cmd 输出。</summary>
+        private static System.Text.Encoding DshProcessEncoding =>
+            System.Text.Encoding.GetEncoding(System.Globalization.CultureInfo.CurrentCulture.TextInfo.ANSICodePage);
 
         /// <summary>根据端口生成 DSH Web UI 的本地访问地址。</summary>
         /// <param name="port">Web UI 监听端口。</param>
@@ -63,6 +68,14 @@ namespace DSH4VS.Core
         private static Process currentProcess;
         private static CancellationTokenSource currentCts;
         private static Process webProcess;
+        private static string pnpmShimDirectory;
+
+        static DshRunner()
+        {
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+            AppDomain.CurrentDomain.ProcessExit += (_, _) => CleanupOnExit();
+            AppDomain.CurrentDomain.DomainUnload += (_, _) => CleanupOnExit();
+        }
 
         #endregion
 
@@ -104,14 +117,37 @@ namespace DSH4VS.Core
         {
             var process = webProcess;
             webProcess = null;
+            DshContextBridge.Stop();
             if (process == null)
             {
                 return false;
             }
 
-            KillTree(process);
-            process.Dispose();
+            try
+            {
+                KillTree(process);
+                if (!process.HasExited)
+                {
+                    process.WaitForExit(5000);
+                }
+            }
+            catch
+            {
+                // 进程可能已经退出，停止操作仍应完成桥接服务清理。
+            }
+            finally
+            {
+                process.Dispose();
+            }
+
             return true;
+        }
+
+        /// <summary>停止扩展持有的 Web 进程和上下文 bridge。</summary>
+        public static void StopAll()
+        {
+            StopWeb();
+            DshContextAutoSync.Stop();
         }
 
         /// <summary>
@@ -130,8 +166,23 @@ namespace DSH4VS.Core
                 client.Timeout = TimeSpan.FromSeconds(1.5);
 
                 using var response = await client.GetAsync(GetWebUrl(port));
+                if (!response.IsSuccessStatusCode)
+                {
+                    return false;
+                }
 
-                return response.IsSuccessStatusCode;
+                var contentType = response.Content.Headers.ContentType?.MediaType;
+                if (!string.IsNullOrWhiteSpace(contentType)
+                    && contentType.Contains("json", StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+
+                var content = await response.Content.ReadAsStringAsync();
+                return content.Contains("<html", StringComparison.OrdinalIgnoreCase)
+                    || content.Contains("<!doctype", StringComparison.OrdinalIgnoreCase)
+                    || content.Contains("DeepSeek", StringComparison.OrdinalIgnoreCase)
+                    || content.Contains("Harness", StringComparison.OrdinalIgnoreCase);
             }
             catch
             {
@@ -143,51 +194,91 @@ namespace DSH4VS.Core
         /// 确保 dsh web profile 在 3080 端口监听；如未运行则启动它。
         /// </summary>
         /// <param name="output">输出通道。</param>
-        public static async Task StartWebAsync(IDshOutput output, int port = WebPort)
+        /// <param name="port">Web UI 监听端口。</param>
+        /// <param name="autoLoadPlugin">是否自动安装并加载 Visual Studio Harness 插件。</param>
+        public static async Task<int> StartWebAsync(IDshOutput output, int port = WebPort,
+            bool autoLoadPlugin = true)
         {
+            if (autoLoadPlugin)
+            {
+                DshContextBridge.Start(output);
+                if (port == DshContextBridge.Port)
+                {
+                    port = FindAvailableWebPort(port + 1);
+                    if (port == 0)
+                    {
+                        output.WriteLine("[DSH] 无法为 Web UI 找到不与上下文桥接冲突的端口。");
+                        return 0;
+                    }
+
+                    output.WriteLine($"[DSH] Web UI 端口与上下文桥接端口冲突，已切换到 {port}。");
+                }
+
+                if (!PreparePnpmEnvironment(output)
+                    || !await EnsurePluginInstalledAsync(output))
+                {
+                    output.WriteLine("[DSH] Visual Studio Harness 插件未安装，已取消 dsh4vs Web UI 启动。");
+                    DshContextBridge.Stop();
+                    return 0;
+                }
+            }
             if (await IsWebUpAsync(port))
             {
-                return;
+                output.WriteLine($"[DSH] Web UI 已在运行: {GetWebUrl(port)}");
+                return port;
             }
 
-            var exe = DshLocator.LocateWeb();
+            var exe = DshLocator.LocateWeb(autoLoadPlugin ? "dsh4vs" : null);
             if (exe == null)
             {
                 output.WriteLine("[DSH] 未找到 npx，无法启动 web UI。请先安装 Node.js。");
-                return;
+                return 0;
             }
 
-            output.WriteLine($"[DSH] 使用 npx @deepseek-ai/dsh web --port {port} 启动 Web UI …");
+            var runtimePatchPath = autoLoadPlugin ? PrepareRuntimePatch(output) : null;
+            var patchArgument = runtimePatchPath == null
+                ? string.Empty
+                : " --patch " + QuoteArgument(runtimePatchPath);
+            output.WriteLine($"[DSH] 启动 Web UI（端口 {port}）…");
             try
             {
                 var psi = new ProcessStartInfo
                 {
                     FileName = exe.FileName,
-                    Arguments = exe.ArgumentsPrefix + $" --port {port}",
+                    Arguments = exe.ArgumentsPrefix + patchArgument + $" --port {port}",
                     WorkingDirectory = Environment.CurrentDirectory,
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
-                    StandardOutputEncoding = System.Text.Encoding.UTF8,
-                    StandardErrorEncoding = System.Text.Encoding.UTF8
+                    StandardOutputEncoding = DshProcessEncoding,
+                    StandardErrorEncoding = DshProcessEncoding
                 };
-                webProcess = Process.Start(psi); // 独立启动，Visual Studio 退出后进程仍会继续运行
-                webProcess.OutputDataReceived += (_, e) =>
+                AddPnpmEnvironment(psi);
+                var process = Process.Start(psi); // 独立启动，Visual Studio 退出后进程仍会继续运行
+                if (process == null)
+                {
+                    output.WriteLine("[DSH] 无法启动 Web UI 进程。");
+                    return 0;
+                }
+
+                webProcess = process;
+                process.OutputDataReceived += (_, e) =>
                 {
                     if (e.Data != null) output.WriteLine(e.Data);
                 };
-                webProcess.ErrorDataReceived += (_, e) =>
+                process.ErrorDataReceived += (_, e) =>
                 {
                     if (e.Data != null) output.WriteLine("[err] " + e.Data);
                 };
-                webProcess.BeginOutputReadLine();
-                webProcess.BeginErrorReadLine();
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
             }
             catch (Exception ex)
             {
+                webProcess = null;
                 output.WriteLine("[DSH] 启动失败: " + ex.Message);
-                return;
+                return 0;
             }
 
             for (var i = 0; i < 40; i++)
@@ -196,10 +287,347 @@ namespace DSH4VS.Core
                 if (await IsWebUpAsync(port))
                 {
                     output.WriteLine($"[DSH] Web UI 就绪: {GetWebUrl(port)}");
-                    return;
+                    return port;
                 }
             }
-            output.WriteLine("[DSH] 等待 Web UI 超时。请手动在终端运行: dsh web");
+            output.WriteLine("[DSH] 等待 Web UI 超时。请检查 DSH 输出中的启动错误。");
+            return 0;
+        }
+
+        /// <summary>将扩展输出目录中的 Harness bundle 安装到 dsh4vs profile。</summary>
+        /// <param name="output">用于记录安装过程的输出通道。</param>
+        private static async Task<bool> EnsurePluginInstalledAsync(IDshOutput output)
+        {
+            var bundlePath = GetBundleInstallPath(output);
+            var packagePath = Path.Combine(bundlePath, "package.json");
+            if (!File.Exists(packagePath))
+            {
+                output.WriteLine("[DSH] 未找到本地 Harness bundle，跳过自动安装。");
+                return false;
+            }
+
+            var exe = DshLocator.LocateNpx();
+            if (exe == null)
+            {
+                output.WriteLine("[DSH] 未找到 npx，无法安装 Visual Studio Harness bundle。");
+                return false;
+            }
+
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = exe.FileName,
+                    Arguments = exe.ArgumentsPrefix + " plugin --profile dsh4vs add " + QuoteArgument(bundlePath),
+                    WorkingDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    StandardOutputEncoding = DshProcessEncoding,
+                    StandardErrorEncoding = DshProcessEncoding
+                };
+                AddPnpmEnvironment(psi);
+                using var process = Process.Start(psi);
+                if (process == null)
+                {
+                    output.WriteLine("[DSH] 无法启动 bundle 安装进程。");
+                    return false;
+                }
+
+                var outputTask = process.StandardOutput.ReadToEndAsync();
+                var errorTask = process.StandardError.ReadToEndAsync();
+                var waitTask = process.WaitForExitAsync();
+                var completed = await Task.WhenAny(waitTask, Task.Delay(TimeSpan.FromMinutes(2)));
+                if (completed != waitTask)
+                {
+                    if (!process.HasExited)
+                    {
+                        KillTree(process);
+                    }
+
+                    output.WriteLine("[DSH] 安装 Visual Studio Harness bundle 超时。");
+                    return false;
+                }
+
+                await Task.WhenAll(outputTask, errorTask);
+                WriteProcessOutput(output, await outputTask, false);
+                WriteProcessOutput(output, await errorTask, true);
+
+                if (process.ExitCode != 0)
+                {
+                    output.WriteLine($"[DSH] bundle 安装失败（exit {process.ExitCode}），已取消 Web UI 启动。");
+                    return false;
+                }
+                else
+                {
+                    output.WriteLine("[DSH] Visual Studio Harness bundle 已安装到 dsh4vs profile。");
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                output.WriteLine("[DSH] 安装 Harness bundle 失败: " + ex.Message);
+                return false;
+            }
+        }
+
+        /// <summary>为当前动态桥接端口生成 Harness 配置覆盖层。</summary>
+        /// <param name="output">用于记录生成失败信息的输出通道。</param>
+        /// <returns>运行时 patch 路径；生成失败时返回空值。</returns>
+        private static string PrepareRuntimePatch(IDshOutput output)
+        {
+            try
+            {
+                var patchPath = Path.Combine(Path.GetTempPath(), "DSH4VS", "visual-studio-context-runtime.yml");
+                Directory.CreateDirectory(Path.GetDirectoryName(patchPath));
+                var bridgeUrl = DshContextBridge.Endpoint.Replace("'", "''");
+                var patch = "- insert:\n"
+                    + "    - id: dsh4vs-visual-studio-context\n"
+                    + "      name: dsh4vs-visual-studio-context\n"
+                    + "      config:\n"
+                    + "        bridgeUrl: '" + bridgeUrl + "'\n"
+                    + "        timeoutMs: 2000\n";
+                File.WriteAllText(patchPath, patch);
+                return patchPath;
+            }
+            catch (Exception ex)
+            {
+                output.WriteLine("[DSH] 生成上下文运行时配置失败: " + ex.Message);
+                return null;
+            }
+        }
+
+        /// <summary>获取扩展程序集目录中的本地 Harness bundle 路径。</summary>
+        private static string GetBundlePath()
+        {
+            var extensionDirectory = Path.GetDirectoryName(typeof(DshRunner).Assembly.Location);
+            return Path.Combine(
+                string.IsNullOrEmpty(extensionDirectory) ? AppContext.BaseDirectory : extensionDirectory,
+                "DshPlugin");
+        }
+
+        /// <summary>
+        /// 计算传递给 `dsh plugin add` 的 bundle 安装路径。pnpm 在 Windows 上由
+        /// cmd.exe 以 shell 方式转发参数，路径中的空格、括号等特殊字符会被 cmd
+        /// 拆成多个参数（例如 VSIX 安装在 "...\Extensions\Ariel AxionL
+        /// (i@axionl.me)\DSH for Visual Studio\..." 下时会直接报
+        /// "\DSH was unexpected at this time"）。因此当原路径含有此类字符时，
+        /// 先把 bundle 复制到不含特殊字符的固定目录再使用。
+        /// </summary>
+        /// <param name="output">用于记录复制过程的输出通道。</param>
+        /// <returns>可直接传给 pnpm 的干净路径。</returns>
+        private static string GetBundleInstallPath(IDshOutput output)
+        {
+            var source = GetBundlePath();
+            if (!PathHasCmdUnsafeChars(source))
+            {
+                return source;
+            }
+
+            var stageRoot = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "DSH4VS", "bundle");
+            try
+            {
+                Directory.CreateDirectory(stageRoot);
+                CopyDirectoryContents(source, stageRoot, overwrite: true);
+                output.WriteLine("[DSH] bundle 路径包含 shell 特殊字符，已复制安装源到 " + stageRoot);
+                return stageRoot;
+            }
+            catch (Exception ex)
+            {
+                output.WriteLine("[DSH] 复制 bundle 到干净路径失败: " + ex.Message + "，直接使用原路径。");
+                return source;
+            }
+        }
+
+        /// <summary>判断路径中是否包含会被 cmd.exe 特殊处理的字符。</summary>
+        /// <param name="path">待检查的路径。</param>
+        /// <returns>包含特殊字符时返回 <see langword="true" />。</returns>
+        private static bool PathHasCmdUnsafeChars(string path)
+        {
+            foreach (var c in path)
+            {
+                if (char.IsWhiteSpace(c)
+                    || c is '&' or '|' or '<' or '>' or '(' or ')' or '^' or '%' or '!' or '\'' or '`' or '"' or ',')
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>把源目录的全部内容复制到目标目录。</summary>
+        /// <param name="sourceDir">源目录。</param>
+        /// <param name="targetDir">目标目录。</param>
+        /// <param name="overwrite">是否覆盖已存在的目标文件。</param>
+        private static void CopyDirectoryContents(string sourceDir, string targetDir, bool overwrite)
+        {
+            foreach (var directory in Directory.GetDirectories(sourceDir, "*", SearchOption.AllDirectories))
+            {
+                Directory.CreateDirectory(directory.Replace(sourceDir, targetDir));
+            }
+
+            foreach (var file in Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories))
+            {
+                var target = file.Replace(sourceDir, targetDir);
+                if (File.Exists(target) && !overwrite)
+                {
+                    continue;
+                }
+
+                File.Copy(file, target, overwrite: true);
+            }
+        }
+
+        /// <summary>生成适用于 Windows 进程参数的带引号路径。</summary>
+        /// <param name="value">需要转义的路径。</param>
+        private static string QuoteArgument(string value)
+        {
+            return "\"" + value.Replace("\"", "\\\"") + "\"";
+        }
+
+        /// <summary>准备 DSH profile 所需的 pnpm 命令 shim。</summary>
+        /// <param name="output">输出通道。</param>
+        /// <returns>是否准备成功。</returns>
+        private static bool PreparePnpmEnvironment(IDshOutput output)
+        {
+            try
+            {
+                var pnpm = FindCommand("pnpm.cmd") ?? FindCommand("pnpm");
+                if (pnpm != null)
+                {
+                    return true;
+                }
+
+                var corepack = FindCommand("corepack.cmd") ?? FindCommand("corepack");
+                if (corepack == null)
+                {
+                    output.WriteLine("[DSH] 未找到 pnpm 或 Corepack，无法安装 Harness bundle。请安装 pnpm。");
+                    return false;
+                }
+
+                pnpmShimDirectory = Path.Combine(Path.GetTempPath(), "DSH4VS", "pnpm");
+                Directory.CreateDirectory(pnpmShimDirectory);
+
+                // 优先绕过 corepack.cmd，直接用 node.exe 运行 corepack.js。corepack.cmd
+                // 内部带括号的 IF EXIST ( … ) 块会在展开含括号的 %* 时提前闭合块，
+                // 导致 cmd 报告 "\DSH was unexpected at this time"（例如安装在
+                // "...\Extensions\Ariel AxionL (i@axionl.me)\..." 下的 VSIX bundle）。
+                // 直接调用 node corepack.js 可把含括号的路径原样传给 pnpm。
+                var corepackDir = Path.GetDirectoryName(corepack);
+                var corepackJs = string.IsNullOrEmpty(corepackDir)
+                    ? null
+                    : Path.Combine(corepackDir, "node_modules", "corepack", "dist", "corepack.js");
+                var nodeExe = FindCommand("node.exe");
+                if (nodeExe == null && !string.IsNullOrEmpty(corepackDir))
+                {
+                    var candidate = Path.Combine(corepackDir, "node.exe");
+                    if (File.Exists(candidate))
+                    {
+                        nodeExe = candidate;
+                    }
+                }
+
+                if (nodeExe != null && corepackJs != null && File.Exists(corepackJs))
+                {
+                    var shimPath = Path.Combine(pnpmShimDirectory, "pnpm.cmd");
+                    File.WriteAllText(shimPath,
+                        "@echo off\r\n"
+                        + "\"" + nodeExe + "\" \"" + corepackJs + "\" pnpm %*\r\n"
+                        + "exit /b %errorlevel%\r\n",
+                        new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+                    output.WriteLine("[DSH] 已使用 Corepack 准备 pnpm shim。");
+                    return true;
+                }
+
+                // 退路：corepack.cmd 布局非常规时，仍按旧方式调用。
+                var shimPathFallback = Path.Combine(pnpmShimDirectory, "pnpm.cmd");
+                var corepackCommand = "\"" + corepack.Trim().Trim('"') + "\"";
+                File.WriteAllText(shimPathFallback,
+                    "@echo off\r\n"
+                    + "call " + corepackCommand + " pnpm %*\r\n"
+                    + "exit /b %errorlevel%\r\n",
+                    new System.Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+                output.WriteLine("[DSH] 已使用 Corepack 准备 pnpm shim。");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                output.WriteLine("[DSH] 准备 pnpm 环境失败: " + ex.Message);
+                return false;
+            }
+        }
+
+        /// <summary>向 DSH 子进程注入 pnpm shim 目录。</summary>
+        /// <param name="startInfo">需要更新的进程启动信息。</param>
+        private static void AddPnpmEnvironment(ProcessStartInfo startInfo)
+        {
+            if (!string.IsNullOrWhiteSpace(pnpmShimDirectory))
+            {
+                var path = startInfo.Environment.TryGetValue("PATH", out var currentPath)
+                    ? currentPath
+                    : Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
+                var nodeDirectory = Path.GetDirectoryName(DshLocator.LocateNpx()?.FileName);
+                startInfo.Environment["PATH"] = string.Join(
+                    Path.PathSeparator.ToString(),
+                    pnpmShimDirectory,
+                    nodeDirectory,
+                    path);
+                startInfo.Environment["COREPACK_ENABLE_PROJECT_SPEC"] = "0";
+            }
+        }
+
+        /// <summary>输出外部进程文本，并对空白输出进行忽略。</summary>
+        /// <param name="output">扩展输出通道。</param>
+        /// <param name="text">进程输出文本。</param>
+        /// <param name="error">是否为标准错误。</param>
+        private static void WriteProcessOutput(IDshOutput output, string text, bool error)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return;
+            }
+
+            foreach (var line in text.Split(["\r\n", "\n"],
+                StringSplitOptions.RemoveEmptyEntries))
+            {
+                output.WriteLine(error ? "[DSH] [err] " + line : "[DSH] " + line);
+            }
+        }
+
+        /// <summary>从当前进程 PATH 中查找命令。</summary>
+        /// <param name="commandName">命令名称。</param>
+        /// <returns>命令路径；未找到时返回空值。</returns>
+        private static string FindCommand(string commandName)
+        {
+            var path = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
+            foreach (var directory in path.Split(Path.PathSeparator,
+                StringSplitOptions.RemoveEmptyEntries))
+            {
+                var candidate = Path.Combine(directory.Trim(), commandName);
+                if (File.Exists(candidate))
+                {
+                    return candidate;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>扩展进程退出时清理 Web 进程和上下文 bridge。</summary>
+        private static void CleanupOnExit()
+        {
+            try
+            {
+                StopAll();
+            }
+            catch
+            {
+                DshContextBridge.Stop();
+            }
         }
 
         /// <summary>
@@ -295,15 +723,38 @@ namespace DSH4VS.Core
         /// <param name="process">需要终止的进程。</param>
         private static void KillTree(Process process)
         {
+            if (process == null)
+            {
+                return;
+            }
+
+            try
+            {
+                if (!process.HasExited)
+                {
+                    process.Kill(entireProcessTree: true);
+                    if (process.WaitForExit(5000))
+                    {
+                        return;
+                    }
+                }
+            }
+            catch
+            {
+                // 进程可能已经退出，继续使用 taskkill 清理仍存活的子进程。
+            }
+
             try
             {
                 using (var killer = Process.Start(new ProcessStartInfo("taskkill", $"/PID {process.Id} /T /F")
                 {
                     UseShellExecute = false,
-                    CreateNoWindow = true
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
                 }))
                 {
-                    killer?.WaitForExit(3000);
+                    killer?.WaitForExit(1000);
                 }
             }
             catch
@@ -315,6 +766,7 @@ namespace DSH4VS.Core
                 if (!process.HasExited)
                 {
                     process.Kill();
+                    process.WaitForExit(5000);
                 }
             }
             catch

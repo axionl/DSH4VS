@@ -3,5 +3,7 @@
   "DSH.Commands.AskDshSelection.DisplayName": "Ask DSH about selection",
   "DSH.Commands.CancelDsh.DisplayName": "Cancel DSH Task",
   "DSH.Commands.OpenDshWeb.DisplayName": "Open DSH Web UI",
-  "DSH.Commands.StopDshWeb.DisplayName": "Stop DSH Web UI"
+  "DSH.Commands.StopDshWeb.DisplayName": "Stop DSH Web UI",
+  "DSH.Commands.SyncDshDocument.DisplayName": "Sync active document to DSH",
+  "DSH.Commands.SyncDshCursor.DisplayName": "Sync cursor position to DSH"
 }
