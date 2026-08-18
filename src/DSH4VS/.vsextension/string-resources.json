@@ -1,0 +1,7 @@
+{
+  "DSH.Commands.AskDsh.DisplayName": "Ask DSH…",
+  "DSH.Commands.AskDshSelection.DisplayName": "Ask DSH about selection",
+  "DSH.Commands.CancelDsh.DisplayName": "Cancel DSH Task",
+  "DSH.Commands.OpenDshWeb.DisplayName": "Open DSH Web UI",
+  "DSH.Commands.StopDshWeb.DisplayName": "Stop DSH Web UI"
+}

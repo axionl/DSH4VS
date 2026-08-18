@@ -1,0 +1,1693 @@
+{
+  "settings": {
+    "components": {
+      "code": true,
+      "binaries": false
+    },
+    "targetId": "net10.0",
+    "targetDisplayName": ".NETCoreApp,Version=v10.0"
+  },
+  "analysisStartTime": "2026-08-14T07:22:17.682788Z",
+  "analysisEndTime": "2026-08-14T07:22:21.3749327Z",
+  "privacyModeHelpUrl": "https://go.microsoft.com/fwlink/?linkid=2270980",
+  "stats": {
+    "summary": {
+      "projects": 1,
+      "issues": 7,
+      "incidents": 63,
+      "effort": 63
+    },
+    "charts": {
+      "severity": {
+        "Mandatory": 54,
+        "Optional": 0,
+        "Potential": 9,
+        "Information": 0
+      },
+      "category": {
+        "NuGet": 5,
+        "Project": 1,
+        "Api": 57
+      }
+    }
+  },
+  "projects": [
+    {
+      "path": "src\\DSH4VS\\DSH4VS.csproj",
+      "startingProject": true,
+      "issues": 6,
+      "storyPoints": 63,
+      "properties": {
+        "appName": "DSH4VS",
+        "projectKind": "Wpf",
+        "frameworks": [
+          "net472"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ],
+        "isSdkStyle": true,
+        "isTestProject": false,
+        "numberOfFiles": 18,
+        "numberOfCodeFiles": 13,
+        "linesTotal": 3950,
+        "linesOfCode": 1291,
+        "totalApiScanned": 2036,
+        "minLinesOfCodeToChange": 57,
+        "maxLinesOfCodeToChange": 57
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "e9535d0b-3c13-4a91-90b2-a5e55fd31f6a",
+          "ruleId": "NuGet.0001",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "MahApps.Metro.IconPacks.Material, 5.0.0\n\n\u5EFA\u8BAE:\n\nMahApps.Metro.IconPacks.Material, 4.11.0",
+              "protected": "MahApps.Metro.IconPacks.Material, 5.0.0\n\n\u5EFA\u8BAE:\n\nMahApps.Metro.IconPacks.Material, 4.11.0"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\DSH4VS.csproj",
+            "snippet": "MahApps.Metro.IconPacks.Material, 5.0.0\n\n\u5EFA\u8BAE:\n\nMahApps.Metro.IconPacks.Material, 4.11.0",
+            "protectedSnippet": "MahApps.Metro.IconPacks.Material, 5.0.0\n\n\u5EFA\u8BAE:\n\nMahApps.Metro.IconPacks.Material, 4.11.0",
+            "label": "MahApps.Metro.IconPacks.Material 5.0.0",
+            "properties": {
+              "PackageId": "MahApps.Metro.IconPacks.Material",
+              "PackageVersion": "5.0.0",
+              "PackageNewVersion": "4.11.0",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "24927bc0-f704-4c6a-9e9b-38a58a563fee",
+          "ruleId": "NuGet.0001",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.NETFramework.ReferenceAssemblies, 1.0.3\n\n\u5EFA\u8BAE:\n\n\u627E\u4E0D\u5230\u53D7\u652F\u6301\u7684\u7248\u672C",
+              "protected": "Microsoft.NETFramework.ReferenceAssemblies, 1.0.3\n\n\u5EFA\u8BAE:\n\n\u627E\u4E0D\u5230\u53D7\u652F\u6301\u7684\u7248\u672C"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\DSH4VS.csproj",
+            "snippet": "Microsoft.NETFramework.ReferenceAssemblies, 1.0.3\n\n\u5EFA\u8BAE:\n\n\u627E\u4E0D\u5230\u53D7\u652F\u6301\u7684\u7248\u672C",
+            "protectedSnippet": "Microsoft.NETFramework.ReferenceAssemblies, 1.0.3\n\n\u5EFA\u8BAE:\n\n\u627E\u4E0D\u5230\u53D7\u652F\u6301\u7684\u7248\u672C",
+            "label": "Microsoft.NETFramework.ReferenceAssemblies 1.0.3",
+            "properties": {
+              "PackageId": "Microsoft.NETFramework.ReferenceAssemblies",
+              "PackageVersion": "1.0.3",
+              "PackageNewVersion": null,
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "7b06120f-ed98-4a21-b33c-19b62c01c91d",
+          "ruleId": "NuGet.0001",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.VisualStudio.SDK, 17.14.40265\n\n\u5EFA\u8BAE:\n\nMicrosoft.VisualStudio.SDK, 16.0.208",
+              "protected": "Microsoft.VisualStudio.SDK, 17.14.40265\n\n\u5EFA\u8BAE:\n\nMicrosoft.VisualStudio.SDK, 16.0.208"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\DSH4VS.csproj",
+            "snippet": "Microsoft.VisualStudio.SDK, 17.14.40265\n\n\u5EFA\u8BAE:\n\nMicrosoft.VisualStudio.SDK, 16.0.208",
+            "protectedSnippet": "Microsoft.VisualStudio.SDK, 17.14.40265\n\n\u5EFA\u8BAE:\n\nMicrosoft.VisualStudio.SDK, 16.0.208",
+            "label": "Microsoft.VisualStudio.SDK 17.14.40265",
+            "properties": {
+              "PackageId": "Microsoft.VisualStudio.SDK",
+              "PackageVersion": "17.14.40265",
+              "PackageNewVersion": "16.0.208",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "2584f24c-546a-486c-b7d1-d244c6b6a80d",
+          "ruleId": "NuGet.0001",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Microsoft.VSSDK.BuildTools, 17.14.2142\n\n\u5EFA\u8BAE:\n\nMicrosoft.VSSDK.BuildTools, 15.7.104",
+              "protected": "Microsoft.VSSDK.BuildTools, 17.14.2142\n\n\u5EFA\u8BAE:\n\nMicrosoft.VSSDK.BuildTools, 15.7.104"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\DSH4VS.csproj",
+            "snippet": "Microsoft.VSSDK.BuildTools, 17.14.2142\n\n\u5EFA\u8BAE:\n\nMicrosoft.VSSDK.BuildTools, 15.7.104",
+            "protectedSnippet": "Microsoft.VSSDK.BuildTools, 17.14.2142\n\n\u5EFA\u8BAE:\n\nMicrosoft.VSSDK.BuildTools, 15.7.104",
+            "label": "Microsoft.VSSDK.BuildTools 17.14.2142",
+            "properties": {
+              "PackageId": "Microsoft.VSSDK.BuildTools",
+              "PackageVersion": "17.14.2142",
+              "PackageNewVersion": "15.7.104",
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "1f80e41e-da06-4d78-84b2-ec3bab361788",
+          "ruleId": "NuGet.0003",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "NETStandard.Library, 2.0.3\n\n\u5EFA\u8BAE:\n\n\u65B0\u6846\u67B6\u5F15\u7528\u968F\u9644\u7684\u5305\u529F\u80FD",
+              "protected": "NETStandard.Library, 2.0.3\n\n\u5EFA\u8BAE:\n\n\u65B0\u6846\u67B6\u5F15\u7528\u968F\u9644\u7684\u5305\u529F\u80FD"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\DSH4VS.csproj",
+            "snippet": "NETStandard.Library, 2.0.3\n\n\u5EFA\u8BAE:\n\n\u65B0\u6846\u67B6\u5F15\u7528\u968F\u9644\u7684\u5305\u529F\u80FD",
+            "protectedSnippet": "NETStandard.Library, 2.0.3\n\n\u5EFA\u8BAE:\n\n\u65B0\u6846\u67B6\u5F15\u7528\u968F\u9644\u7684\u5305\u529F\u80FD",
+            "label": "NETStandard.Library 2.0.3",
+            "properties": {
+              "PackageId": "NETStandard.Library",
+              "PackageVersion": "2.0.3",
+              "PackageNewVersion": null,
+              "PackageReplacements": null
+            }
+          }
+        },
+        {
+          "incidentId": "0e52b68b-e9d5-412c-b57f-253c02db4cd9",
+          "ruleId": "Project.0002",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "\u5F53\u524D\u76EE\u6807\u6846\u67B6: net472\n\u5EFA\u8BAE\u7684\u76EE\u6807\u6846\u67B6: net10.0-windows",
+              "protected": "\u5F53\u524D\u76EE\u6807\u6846\u67B6: net472\n\u5EFA\u8BAE\u7684\u76EE\u6807\u6846\u67B6: net10.0-windows"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\DSH4VS.csproj",
+            "snippet": "\u5F53\u524D\u76EE\u6807\u6846\u67B6: net472\n\u5EFA\u8BAE\u7684\u76EE\u6807\u6846\u67B6: net10.0-windows",
+            "protectedSnippet": "\u5F53\u524D\u76EE\u6807\u6846\u67B6: net472\n\u5EFA\u8BAE\u7684\u76EE\u6807\u6846\u67B6: net10.0-windows",
+            "properties": {
+              "CurrentTargetFramework": "net472",
+              "RecommendedTargetFramework": "net10.0-windows"
+            }
+          }
+        },
+        {
+          "incidentId": "1d75d718-3af2-4d9a-9e38-19e1ae3420c5",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "protected override void AddEventHandler(System.Reflection.EventInfo eventInfo, object target, System.Delegate handler)",
+              "protected": "M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.AddEventHandler(System.Reflection.EventInfo,System.Object,System.Delegate)"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\obj\\Debug\\net472\\GeneratedInternalTypeHelper.g.i.cs",
+            "snippet": "protected override void AddEventHandler(System.Reflection.EventInfo eventInfo, object target, System.Delegate handler)",
+            "protectedSnippet": "M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.AddEventHandler(System.Reflection.EventInfo,System.Object,System.Delegate)",
+            "label": "M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.AddEventHandler(System.Reflection.EventInfo,System.Object,System.Delegate)",
+            "properties": {
+              "CharCount": "2908"
+            },
+            "line": 56,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "8a3b87c8-0ee7-42d2-b493-1743a96c5b7d",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "protected override System.Delegate CreateDelegate(System.Type delegateType, object target, string handler)",
+              "protected": "M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.CreateDelegate(System.Type,System.Object,System.String)"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\obj\\Debug\\net472\\GeneratedInternalTypeHelper.g.i.cs",
+            "snippet": "protected override System.Delegate CreateDelegate(System.Type delegateType, object target, string handler)",
+            "protectedSnippet": "M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.CreateDelegate(System.Type,System.Object,System.String)",
+            "label": "M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.CreateDelegate(System.Type,System.Object,System.String)",
+            "properties": {
+              "CharCount": "2908"
+            },
+            "line": 46,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "d121f749-bef2-488d-8a67-b7c5932fd2dc",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "protected override void SetPropertyValue(System.Reflection.PropertyInfo propertyInfo, object target, object value, System.Globalization.CultureInfo culture)",
+              "protected": "M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.SetPropertyValue(System.Reflection.PropertyInfo,System.Object,System.Object,System.Globalization.CultureInfo)"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\obj\\Debug\\net472\\GeneratedInternalTypeHelper.g.i.cs",
+            "snippet": "protected override void SetPropertyValue(System.Reflection.PropertyInfo propertyInfo, object target, object value, System.Globalization.CultureInfo culture)",
+            "protectedSnippet": "M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.SetPropertyValue(System.Reflection.PropertyInfo,System.Object,System.Object,System.Globalization.CultureInfo)",
+            "label": "M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.SetPropertyValue(System.Reflection.PropertyInfo,System.Object,System.Object,System.Globalization.CultureInfo)",
+            "properties": {
+              "CharCount": "2908"
+            },
+            "line": 39,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "4c8403ee-a308-4e3a-8dfc-67e4d8ed7d7a",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "protected override object GetPropertyValue(System.Reflection.PropertyInfo propertyInfo, object target, System.Globalization.CultureInfo culture)",
+              "protected": "M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.GetPropertyValue(System.Reflection.PropertyInfo,System.Object,System.Globalization.CultureInfo)"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\obj\\Debug\\net472\\GeneratedInternalTypeHelper.g.i.cs",
+            "snippet": "protected override object GetPropertyValue(System.Reflection.PropertyInfo propertyInfo, object target, System.Globalization.CultureInfo culture)",
+            "protectedSnippet": "M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.GetPropertyValue(System.Reflection.PropertyInfo,System.Object,System.Globalization.CultureInfo)",
+            "label": "M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.GetPropertyValue(System.Reflection.PropertyInfo,System.Object,System.Globalization.CultureInfo)",
+            "properties": {
+              "CharCount": "2908"
+            },
+            "line": 32,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "5db77c05-e3bb-4abb-89f6-9c5737686e02",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "protected override object CreateInstance(System.Type type, System.Globalization.CultureInfo culture)",
+              "protected": "M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.CreateInstance(System.Type,System.Globalization.CultureInfo)"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\obj\\Debug\\net472\\GeneratedInternalTypeHelper.g.i.cs",
+            "snippet": "protected override object CreateInstance(System.Type type, System.Globalization.CultureInfo culture)",
+            "protectedSnippet": "M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.CreateInstance(System.Type,System.Globalization.CultureInfo)",
+            "label": "M:XamlGeneratedNamespace.GeneratedInternalTypeHelper.CreateInstance(System.Type,System.Globalization.CultureInfo)",
+            "properties": {
+              "CharCount": "2908"
+            },
+            "line": 24,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "b2b166de-8d75-4642-9a77-c16adaa33e3a",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "InternalTypeHelper",
+              "protected": "M:System.Windows.Markup.InternalTypeHelper.#ctor"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\obj\\Debug\\net472\\GeneratedInternalTypeHelper.g.i.cs",
+            "snippet": "InternalTypeHelper",
+            "protectedSnippet": "M:System.Windows.Markup.InternalTypeHelper.#ctor",
+            "label": "M:System.Windows.Markup.InternalTypeHelper.#ctor",
+            "properties": {
+              "CharCount": "2908"
+            },
+            "line": 19,
+            "column": 76
+          }
+        },
+        {
+          "incidentId": "5bd71206-fd22-4027-a975-3e685916e060",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "InternalTypeHelper",
+              "protected": "T:System.Windows.Markup.InternalTypeHelper"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\obj\\Debug\\net472\\GeneratedInternalTypeHelper.g.i.cs",
+            "snippet": "InternalTypeHelper",
+            "protectedSnippet": "T:System.Windows.Markup.InternalTypeHelper",
+            "label": "T:System.Windows.Markup.InternalTypeHelper",
+            "properties": {
+              "CharCount": "2908"
+            },
+            "line": 19,
+            "column": 76
+          }
+        },
+        {
+          "incidentId": "dd814048-cf2b-4176-b5d0-fc566d0fbb79",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "public sealed GeneratedInternalTypeHelper : System.Windows.Markup.InternalTypeHelper",
+              "protected": "T:XamlGeneratedNamespace.GeneratedInternalTypeHelper"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\obj\\Debug\\net472\\GeneratedInternalTypeHelper.g.i.cs",
+            "snippet": "public sealed GeneratedInternalTypeHelper : System.Windows.Markup.InternalTypeHelper",
+            "protectedSnippet": "T:XamlGeneratedNamespace.GeneratedInternalTypeHelper",
+            "label": "T:XamlGeneratedNamespace.GeneratedInternalTypeHelper",
+            "properties": {
+              "CharCount": "2908"
+            },
+            "line": 16,
+            "column": 4
+          }
+        },
+        {
+          "incidentId": "c79c99c6-f583-4215-9591-921a91c56a50",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "if (dialog.ShowDialog() != true) return;",
+              "protected": "M:System.Windows.Window.ShowDialog"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\Commands\\DSHCommands.cs",
+            "snippet": "if (dialog.ShowDialog() != true) return;",
+            "protectedSnippet": "M:System.Windows.Window.ShowDialog",
+            "label": "M:System.Windows.Window.ShowDialog",
+            "properties": {
+              "CharCount": "3389"
+            },
+            "line": 54,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "019adbe3-4e34-4ebb-b7d1-2681ea542eb5",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var dialog = new PromptDialog(ctx, forceSelection)\n                {\n                    Owner = Application.Current?.MainWindow\n                };",
+              "protected": "T:System.Windows.Window"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\Commands\\DSHCommands.cs",
+            "snippet": "var dialog = new PromptDialog(ctx, forceSelection)\n                {\n                    Owner = Application.Current?.MainWindow\n                };",
+            "protectedSnippet": "T:System.Windows.Window",
+            "label": "T:System.Windows.Window",
+            "properties": {
+              "CharCount": "3389"
+            },
+            "line": 50,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "9db294f8-7be3-44bd-85d3-934bbfb1694f",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var dialog = new PromptDialog(ctx, forceSelection)\n                {\n                    Owner = Application.Current?.MainWindow\n                };",
+              "protected": "P:System.Windows.Application.MainWindow"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\Commands\\DSHCommands.cs",
+            "snippet": "var dialog = new PromptDialog(ctx, forceSelection)\n                {\n                    Owner = Application.Current?.MainWindow\n                };",
+            "protectedSnippet": "P:System.Windows.Application.MainWindow",
+            "label": "P:System.Windows.Application.MainWindow",
+            "properties": {
+              "CharCount": "3389"
+            },
+            "line": 50,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "a9f30631-1e5c-4ad1-8edc-805d910a1a39",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var dialog = new PromptDialog(ctx, forceSelection)\n                {\n                    Owner = Application.Current?.MainWindow\n                };",
+              "protected": "T:System.Windows.Application"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\Commands\\DSHCommands.cs",
+            "snippet": "var dialog = new PromptDialog(ctx, forceSelection)\n                {\n                    Owner = Application.Current?.MainWindow\n                };",
+            "protectedSnippet": "T:System.Windows.Application",
+            "label": "T:System.Windows.Application",
+            "properties": {
+              "CharCount": "3389"
+            },
+            "line": 50,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "cea2f8dc-bd70-4b6e-9ba1-e3a8734f438d",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var dialog = new PromptDialog(ctx, forceSelection)\n                {\n                    Owner = Application.Current?.MainWindow\n                };",
+              "protected": "T:System.Windows.Application"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\Commands\\DSHCommands.cs",
+            "snippet": "var dialog = new PromptDialog(ctx, forceSelection)\n                {\n                    Owner = Application.Current?.MainWindow\n                };",
+            "protectedSnippet": "T:System.Windows.Application",
+            "label": "T:System.Windows.Application",
+            "properties": {
+              "CharCount": "3389"
+            },
+            "line": 50,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "1ea10337-f7e7-410f-be32-a02873f50e0f",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var dialog = new PromptDialog(ctx, forceSelection)\n                {\n                    Owner = Application.Current?.MainWindow\n                };",
+              "protected": "P:System.Windows.Application.Current"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\Commands\\DSHCommands.cs",
+            "snippet": "var dialog = new PromptDialog(ctx, forceSelection)\n                {\n                    Owner = Application.Current?.MainWindow\n                };",
+            "protectedSnippet": "P:System.Windows.Application.Current",
+            "label": "P:System.Windows.Application.Current",
+            "properties": {
+              "CharCount": "3389"
+            },
+            "line": 50,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "be261cac-d619-4147-8a7b-081c87465a26",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var dialog = new PromptDialog(ctx, forceSelection)\n                {\n                    Owner = Application.Current?.MainWindow\n                };",
+              "protected": "T:System.Windows.Window"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\Commands\\DSHCommands.cs",
+            "snippet": "var dialog = new PromptDialog(ctx, forceSelection)\n                {\n                    Owner = Application.Current?.MainWindow\n                };",
+            "protectedSnippet": "T:System.Windows.Window",
+            "label": "T:System.Windows.Window",
+            "properties": {
+              "CharCount": "3389"
+            },
+            "line": 50,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "37564b9e-d1d4-4d4d-86e3-bd9afa89fdae",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "var dialog = new PromptDialog(ctx, forceSelection)\n                {\n                    Owner = Application.Current?.MainWindow\n                };",
+              "protected": "P:System.Windows.Window.Owner"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\Commands\\DSHCommands.cs",
+            "snippet": "var dialog = new PromptDialog(ctx, forceSelection)\n                {\n                    Owner = Application.Current?.MainWindow\n                };",
+            "protectedSnippet": "P:System.Windows.Window.Owner",
+            "label": "P:System.Windows.Window.Owner",
+            "properties": {
+              "CharCount": "3389"
+            },
+            "line": 50,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "f64190fb-bcd3-41ef-b371-ec0d2347c1c5",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "mcs.AddCommand(cancel);",
+              "protected": "M:System.ComponentModel.Design.MenuCommandService.AddCommand(System.ComponentModel.Design.MenuCommand)"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\Commands\\DSHCommands.cs",
+            "snippet": "mcs.AddCommand(cancel);",
+            "protectedSnippet": "M:System.ComponentModel.Design.MenuCommandService.AddCommand(System.ComponentModel.Design.MenuCommand)",
+            "label": "M:System.ComponentModel.Design.MenuCommandService.AddCommand(System.ComponentModel.Design.MenuCommand)",
+            "properties": {
+              "CharCount": "3389"
+            },
+            "line": 40,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "754fc64a-0e7b-4a63-a269-6f2dae2e35e2",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "mcs.AddCommand(openWeb);",
+              "protected": "M:System.ComponentModel.Design.MenuCommandService.AddCommand(System.ComponentModel.Design.MenuCommand)"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\Commands\\DSHCommands.cs",
+            "snippet": "mcs.AddCommand(openWeb);",
+            "protectedSnippet": "M:System.ComponentModel.Design.MenuCommandService.AddCommand(System.ComponentModel.Design.MenuCommand)",
+            "label": "M:System.ComponentModel.Design.MenuCommandService.AddCommand(System.ComponentModel.Design.MenuCommand)",
+            "properties": {
+              "CharCount": "3389"
+            },
+            "line": 34,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "3f6cb1f0-61ee-4b10-9916-ef6279776857",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "mcs.AddCommand(askSelection);",
+              "protected": "M:System.ComponentModel.Design.MenuCommandService.AddCommand(System.ComponentModel.Design.MenuCommand)"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\Commands\\DSHCommands.cs",
+            "snippet": "mcs.AddCommand(askSelection);",
+            "protectedSnippet": "M:System.ComponentModel.Design.MenuCommandService.AddCommand(System.ComponentModel.Design.MenuCommand)",
+            "label": "M:System.ComponentModel.Design.MenuCommandService.AddCommand(System.ComponentModel.Design.MenuCommand)",
+            "properties": {
+              "CharCount": "3389"
+            },
+            "line": 29,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "a4de9d50-0059-4656-8576-9a41bc31cad5",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "mcs.AddCommand(ask);",
+              "protected": "M:System.ComponentModel.Design.MenuCommandService.AddCommand(System.ComponentModel.Design.MenuCommand)"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\Commands\\DSHCommands.cs",
+            "snippet": "mcs.AddCommand(ask);",
+            "protectedSnippet": "M:System.ComponentModel.Design.MenuCommandService.AddCommand(System.ComponentModel.Design.MenuCommand)",
+            "label": "M:System.ComponentModel.Design.MenuCommandService.AddCommand(System.ComponentModel.Design.MenuCommand)",
+            "properties": {
+              "CharCount": "3389"
+            },
+            "line": 24,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "b41cb53b-3468-4468-83ea-80c1084fa19a",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "window.DialogResult = true;",
+              "protected": "P:System.Windows.Window.DialogResult"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\PromptDialogViewModel.cs",
+            "snippet": "window.DialogResult = true;",
+            "protectedSnippet": "P:System.Windows.Window.DialogResult",
+            "label": "P:System.Windows.Window.DialogResult",
+            "properties": {
+              "CharCount": "10940"
+            },
+            "line": 232,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "0bab77f5-c41f-41c9-b1b3-2b0a29961a8d",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "System.Windows.Application.LoadComponent(this, resourceLocater);",
+              "protected": "T:System.Windows.Application"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\obj\\Debug\\net472\\UI\\DSHWebWindowControl.g.i.cs",
+            "snippet": "System.Windows.Application.LoadComponent(this, resourceLocater);",
+            "protectedSnippet": "T:System.Windows.Application",
+            "label": "T:System.Windows.Application",
+            "properties": {
+              "CharCount": "3676"
+            },
+            "line": 68,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "8c36f9ca-fc75-41c2-a3ed-2bef7ded0d94",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "System.Windows.Application.LoadComponent(this, resourceLocater);",
+              "protected": "M:System.Windows.Application.LoadComponent(System.Object,System.Uri)"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\obj\\Debug\\net472\\UI\\DSHWebWindowControl.g.i.cs",
+            "snippet": "System.Windows.Application.LoadComponent(this, resourceLocater);",
+            "protectedSnippet": "M:System.Windows.Application.LoadComponent(System.Object,System.Uri)",
+            "label": "M:System.Windows.Application.LoadComponent(System.Object,System.Uri)",
+            "properties": {
+              "CharCount": "3676"
+            },
+            "line": 68,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "a226afd6-7d1e-4578-9c63-3d1dfae86bb1",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: URI length limits removed ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "System.Uri resourceLocater = new System.Uri(\u0022/DeepSeekForVisualStudio;V1.0.0.0;component/ui/dshwebwindowcontrol.xaml\u0022, System.UriKind.Relative);",
+              "protected": "T:System.Uri"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\obj\\Debug\\net472\\UI\\DSHWebWindowControl.g.i.cs",
+            "snippet": "System.Uri resourceLocater = new System.Uri(\u0022/DeepSeekForVisualStudio;V1.0.0.0;component/ui/dshwebwindowcontrol.xaml\u0022, System.UriKind.Relative);",
+            "protectedSnippet": "T:System.Uri",
+            "label": "T:System.Uri",
+            "properties": {
+              "CharCount": "3676"
+            },
+            "links": [
+              {
+                "title": "API \u6587\u6863",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/networking/10.0/uri-length-limits-removed.md",
+                "isCustom": false
+              }
+            ],
+            "line": 65,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "a8fb9a51-3815-4dea-9286-fcffbbbe11b4",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: URI length limits removed ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "System.Uri resourceLocater = new System.Uri(\u0022/DeepSeekForVisualStudio;V1.0.0.0;component/ui/dshwebwindowcontrol.xaml\u0022, System.UriKind.Relative);",
+              "protected": "M:System.Uri.#ctor(System.String,System.UriKind)"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\obj\\Debug\\net472\\UI\\DSHWebWindowControl.g.i.cs",
+            "snippet": "System.Uri resourceLocater = new System.Uri(\u0022/DeepSeekForVisualStudio;V1.0.0.0;component/ui/dshwebwindowcontrol.xaml\u0022, System.UriKind.Relative);",
+            "protectedSnippet": "M:System.Uri.#ctor(System.String,System.UriKind)",
+            "label": "M:System.Uri.#ctor(System.String,System.UriKind)",
+            "properties": {
+              "CharCount": "3676"
+            },
+            "links": [
+              {
+                "title": "API \u6587\u6863",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/networking/10.0/uri-length-limits-removed.md",
+                "isCustom": false
+              }
+            ],
+            "line": 65,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "37eff590-65bc-412e-92b6-3ec01627fe2b",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "protected override void OnVisualParentChanged(DependencyObject oldParent)",
+              "protected": "T:System.Windows.DependencyObject"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\DSHWebWindowControl.xaml.cs",
+            "snippet": "protected override void OnVisualParentChanged(DependencyObject oldParent)",
+            "protectedSnippet": "T:System.Windows.DependencyObject",
+            "label": "T:System.Windows.DependencyObject",
+            "properties": {
+              "CharCount": "1745"
+            },
+            "line": 49,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "174ddec6-7b18-4461-9971-ea3009852b77",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "if (VisualParent == null)\r\n                _viewModel.NavigateRequested -= ViewModel_NavigateRequested;",
+              "protected": "T:System.Windows.DependencyObject"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\DSHWebWindowControl.xaml.cs",
+            "snippet": "if (VisualParent == null)\r\n                _viewModel.NavigateRequested -= ViewModel_NavigateRequested;",
+            "protectedSnippet": "T:System.Windows.DependencyObject",
+            "label": "T:System.Windows.DependencyObject",
+            "properties": {
+              "CharCount": "1745"
+            },
+            "line": 52,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "37032c35-a3c9-47a0-bc5c-72a462ddc3a8",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "if (VisualParent == null)\r\n                _viewModel.NavigateRequested -= ViewModel_NavigateRequested;",
+              "protected": "P:System.Windows.Media.Visual.VisualParent"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\DSHWebWindowControl.xaml.cs",
+            "snippet": "if (VisualParent == null)\r\n                _viewModel.NavigateRequested -= ViewModel_NavigateRequested;",
+            "protectedSnippet": "P:System.Windows.Media.Visual.VisualParent",
+            "label": "P:System.Windows.Media.Visual.VisualParent",
+            "properties": {
+              "CharCount": "1745"
+            },
+            "line": 52,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "54764e5b-ab19-4573-a60a-c874fc68a7a7",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "base.OnVisualParentChanged(oldParent);",
+              "protected": "M:System.Windows.FrameworkElement.OnVisualParentChanged(System.Windows.DependencyObject)"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\DSHWebWindowControl.xaml.cs",
+            "snippet": "base.OnVisualParentChanged(oldParent);",
+            "protectedSnippet": "M:System.Windows.FrameworkElement.OnVisualParentChanged(System.Windows.DependencyObject)",
+            "label": "M:System.Windows.FrameworkElement.OnVisualParentChanged(System.Windows.DependencyObject)",
+            "properties": {
+              "CharCount": "1745"
+            },
+            "line": 51,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "abf7d3d2-10e4-4ac4-a8ca-fa9c0e20405a",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: URI length limits removed ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Browser.Source = new Uri(DshRunner.WebUrl);",
+              "protected": "T:System.Uri"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\DSHWebWindowControl.xaml.cs",
+            "snippet": "Browser.Source = new Uri(DshRunner.WebUrl);",
+            "protectedSnippet": "T:System.Uri",
+            "label": "T:System.Uri",
+            "properties": {
+              "CharCount": "1745"
+            },
+            "links": [
+              {
+                "title": "API \u6587\u6863",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/networking/10.0/uri-length-limits-removed.md",
+                "isCustom": false
+              }
+            ],
+            "line": 39,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "81b79463-42e8-4050-9647-1fe8801f7e5b",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: URI length limits removed ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Browser.Source = new Uri(DshRunner.WebUrl);",
+              "protected": "M:System.Uri.#ctor(System.String)"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\DSHWebWindowControl.xaml.cs",
+            "snippet": "Browser.Source = new Uri(DshRunner.WebUrl);",
+            "protectedSnippet": "M:System.Uri.#ctor(System.String)",
+            "label": "M:System.Uri.#ctor(System.String)",
+            "properties": {
+              "CharCount": "1745"
+            },
+            "links": [
+              {
+                "title": "API \u6587\u6863",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/networking/10.0/uri-length-limits-removed.md",
+                "isCustom": false
+              }
+            ],
+            "line": 39,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "38ebb3e8-f094-450a-960c-968f47e13226",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: URI length limits removed ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Browser.Source = new Uri(DshRunner.WebUrl);",
+              "protected": "T:System.Uri"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\DSHWebWindowControl.xaml.cs",
+            "snippet": "Browser.Source = new Uri(DshRunner.WebUrl);",
+            "protectedSnippet": "T:System.Uri",
+            "label": "T:System.Uri",
+            "properties": {
+              "CharCount": "1745"
+            },
+            "links": [
+              {
+                "title": "API \u6587\u6863",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/networking/10.0/uri-length-limits-removed.md",
+                "isCustom": false
+              }
+            ],
+            "line": 39,
+            "column": 16
+          }
+        },
+        {
+          "incidentId": "1d91f2f9-e842-4f01-b873-5c7fe62a58a6",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "private async void OnLoaded(object sender, RoutedEventArgs e)",
+              "protected": "T:System.Windows.RoutedEventArgs"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\DSHWebWindowControl.xaml.cs",
+            "snippet": "private async void OnLoaded(object sender, RoutedEventArgs e)",
+            "protectedSnippet": "T:System.Windows.RoutedEventArgs",
+            "label": "T:System.Windows.RoutedEventArgs",
+            "properties": {
+              "CharCount": "1745"
+            },
+            "line": 22,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "19e59afc-1480-4bf4-8d7c-f886257bf243",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Loaded \u002B= OnLoaded;",
+              "protected": "T:System.Windows.RoutedEventHandler"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\DSHWebWindowControl.xaml.cs",
+            "snippet": "Loaded \u002B= OnLoaded;",
+            "protectedSnippet": "T:System.Windows.RoutedEventHandler",
+            "label": "T:System.Windows.RoutedEventHandler",
+            "properties": {
+              "CharCount": "1745"
+            },
+            "line": 19,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "ac761ea9-bde1-4904-a6da-61149b833aa1",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Loaded \u002B= OnLoaded;",
+              "protected": "T:System.Windows.RoutedEventHandler"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\DSHWebWindowControl.xaml.cs",
+            "snippet": "Loaded \u002B= OnLoaded;",
+            "protectedSnippet": "T:System.Windows.RoutedEventHandler",
+            "label": "T:System.Windows.RoutedEventHandler",
+            "properties": {
+              "CharCount": "1745"
+            },
+            "line": 19,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "541bbe06-f640-4c35-93aa-5be6c0a05fa4",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Loaded \u002B= OnLoaded;",
+              "protected": "E:System.Windows.FrameworkElement.Loaded"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\DSHWebWindowControl.xaml.cs",
+            "snippet": "Loaded \u002B= OnLoaded;",
+            "protectedSnippet": "E:System.Windows.FrameworkElement.Loaded",
+            "label": "E:System.Windows.FrameworkElement.Loaded",
+            "properties": {
+              "CharCount": "1745"
+            },
+            "line": 19,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "f77ca123-cacf-4d43-bdce-e2692d516feb",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "DataContext = _viewModel;",
+              "protected": "P:System.Windows.FrameworkElement.DataContext"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\DSHWebWindowControl.xaml.cs",
+            "snippet": "DataContext = _viewModel;",
+            "protectedSnippet": "P:System.Windows.FrameworkElement.DataContext",
+            "label": "P:System.Windows.FrameworkElement.DataContext",
+            "properties": {
+              "CharCount": "1745"
+            },
+            "line": 18,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "7ba0a585-7074-4a9b-ba52-27aa486abd62",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "public DSHWebWindowControl()\r\n        {\r\n            InitializeComponent();\r\n            _viewModel = new DSHWebWindowViewModel();\r\n            _viewModel.NavigateRequested \u002B= ViewModel_NavigateRequested;\r\n            DataContext = _viewModel;\r\n            Loaded \u002B= OnLoaded;\r\n        }",
+              "protected": "M:System.Windows.Controls.UserControl.#ctor"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\DSHWebWindowControl.xaml.cs",
+            "snippet": "public DSHWebWindowControl()\r\n        {\r\n            InitializeComponent();\r\n            _viewModel = new DSHWebWindowViewModel();\r\n            _viewModel.NavigateRequested \u002B= ViewModel_NavigateRequested;\r\n            DataContext = _viewModel;\r\n            Loaded \u002B= OnLoaded;\r\n        }",
+            "protectedSnippet": "M:System.Windows.Controls.UserControl.#ctor",
+            "label": "M:System.Windows.Controls.UserControl.#ctor",
+            "properties": {
+              "CharCount": "1745"
+            },
+            "line": 13,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "0b183a0e-694d-49fa-b5a9-96ebc71fcf28",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Loaded \u002B= OnLoaded;",
+              "protected": "T:System.Windows.RoutedEventHandler"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\DSHWebWindowControl.xaml.cs",
+            "snippet": "Loaded \u002B= OnLoaded;",
+            "protectedSnippet": "T:System.Windows.RoutedEventHandler",
+            "label": "T:System.Windows.RoutedEventHandler",
+            "properties": {
+              "CharCount": "1745"
+            },
+            "line": 19,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "784b8345-295d-42e8-8180-1cabffe36c28",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Loaded \u002B= OnLoaded;",
+              "protected": "T:System.Windows.RoutedEventHandler"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\DSHWebWindowControl.xaml.cs",
+            "snippet": "Loaded \u002B= OnLoaded;",
+            "protectedSnippet": "T:System.Windows.RoutedEventHandler",
+            "label": "T:System.Windows.RoutedEventHandler",
+            "properties": {
+              "CharCount": "1745"
+            },
+            "line": 19,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "1b252129-1602-488b-b8a3-ab23463b0ffb",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Loaded \u002B= OnLoaded;",
+              "protected": "E:System.Windows.FrameworkElement.Loaded"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\DSHWebWindowControl.xaml.cs",
+            "snippet": "Loaded \u002B= OnLoaded;",
+            "protectedSnippet": "E:System.Windows.FrameworkElement.Loaded",
+            "label": "E:System.Windows.FrameworkElement.Loaded",
+            "properties": {
+              "CharCount": "1745"
+            },
+            "line": 19,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "1943d9aa-8113-49e0-b43e-2ebedb00aa3b",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "DataContext = _viewModel;",
+              "protected": "P:System.Windows.FrameworkElement.DataContext"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\DSHWebWindowControl.xaml.cs",
+            "snippet": "DataContext = _viewModel;",
+            "protectedSnippet": "P:System.Windows.FrameworkElement.DataContext",
+            "label": "P:System.Windows.FrameworkElement.DataContext",
+            "properties": {
+              "CharCount": "1745"
+            },
+            "line": 18,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "75155b7a-efa0-4a45-b2a6-9e18fc4b9b90",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "public DSHWebWindowControl()\r\n        {\r\n            InitializeComponent();\r\n            _viewModel = new DSHWebWindowViewModel();\r\n            _viewModel.NavigateRequested \u002B= ViewModel_NavigateRequested;\r\n            DataContext = _viewModel;\r\n            Loaded \u002B= OnLoaded;\r\n        }",
+              "protected": "M:System.Windows.Controls.UserControl.#ctor"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\DSHWebWindowControl.xaml.cs",
+            "snippet": "public DSHWebWindowControl()\r\n        {\r\n            InitializeComponent();\r\n            _viewModel = new DSHWebWindowViewModel();\r\n            _viewModel.NavigateRequested \u002B= ViewModel_NavigateRequested;\r\n            DataContext = _viewModel;\r\n            Loaded \u002B= OnLoaded;\r\n        }",
+            "protectedSnippet": "M:System.Windows.Controls.UserControl.#ctor",
+            "label": "M:System.Windows.Controls.UserControl.#ctor",
+            "properties": {
+              "CharCount": "1745"
+            },
+            "line": 13,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "e8174d0a-62be-4193-ad01-edc58674bc04",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "IComponentConnector",
+              "protected": "T:System.Windows.Markup.IComponentConnector"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\obj\\Debug\\net472\\UI\\DSHWebWindowControl.g.i.cs",
+            "snippet": "IComponentConnector",
+            "protectedSnippet": "T:System.Windows.Markup.IComponentConnector",
+            "label": "T:System.Windows.Markup.IComponentConnector",
+            "properties": {
+              "CharCount": "3676"
+            },
+            "line": 43,
+            "column": 106
+          }
+        },
+        {
+          "incidentId": "a31f0b16-c90a-4684-883e-826ba0d3920f",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "UserControl",
+              "protected": "T:System.Windows.Controls.UserControl"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\DSHWebWindowControl.xaml.cs",
+            "snippet": "UserControl",
+            "protectedSnippet": "T:System.Windows.Controls.UserControl",
+            "label": "T:System.Windows.Controls.UserControl",
+            "properties": {
+              "CharCount": "1745"
+            },
+            "line": 8,
+            "column": 47
+          }
+        },
+        {
+          "incidentId": "96b035d8-4b93-48de-a89e-4056c13bb81f",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "System.Windows.Application.LoadComponent(this, resourceLocater);",
+              "protected": "T:System.Windows.Application"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\obj\\Debug\\net472\\UI\\PromptDialog.g.i.cs",
+            "snippet": "System.Windows.Application.LoadComponent(this, resourceLocater);",
+            "protectedSnippet": "T:System.Windows.Application",
+            "label": "T:System.Windows.Application",
+            "properties": {
+              "CharCount": "3507"
+            },
+            "line": 72,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "f32f45c3-b74f-436a-968d-fe851c7cd0c2",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "System.Windows.Application.LoadComponent(this, resourceLocater);",
+              "protected": "M:System.Windows.Application.LoadComponent(System.Object,System.Uri)"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\obj\\Debug\\net472\\UI\\PromptDialog.g.i.cs",
+            "snippet": "System.Windows.Application.LoadComponent(this, resourceLocater);",
+            "protectedSnippet": "M:System.Windows.Application.LoadComponent(System.Object,System.Uri)",
+            "label": "M:System.Windows.Application.LoadComponent(System.Object,System.Uri)",
+            "properties": {
+              "CharCount": "3507"
+            },
+            "line": 72,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "5f9f962d-638e-4e75-8418-f59e43b9092c",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: URI length limits removed ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "System.Uri resourceLocater = new System.Uri(\u0022/DeepSeekForVisualStudio;V1.0.0.0;component/ui/promptdialog.xaml\u0022, System.UriKind.Relative);",
+              "protected": "T:System.Uri"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\obj\\Debug\\net472\\UI\\PromptDialog.g.i.cs",
+            "snippet": "System.Uri resourceLocater = new System.Uri(\u0022/DeepSeekForVisualStudio;V1.0.0.0;component/ui/promptdialog.xaml\u0022, System.UriKind.Relative);",
+            "protectedSnippet": "T:System.Uri",
+            "label": "T:System.Uri",
+            "properties": {
+              "CharCount": "3507"
+            },
+            "links": [
+              {
+                "title": "API \u6587\u6863",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/networking/10.0/uri-length-limits-removed.md",
+                "isCustom": false
+              }
+            ],
+            "line": 69,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "76e46a54-db52-4213-9be1-563e717aeec7",
+          "ruleId": "Api.0003",
+          "description": "Breaking change: URI length limits removed ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "System.Uri resourceLocater = new System.Uri(\u0022/DeepSeekForVisualStudio;V1.0.0.0;component/ui/promptdialog.xaml\u0022, System.UriKind.Relative);",
+              "protected": "M:System.Uri.#ctor(System.String,System.UriKind)"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\obj\\Debug\\net472\\UI\\PromptDialog.g.i.cs",
+            "snippet": "System.Uri resourceLocater = new System.Uri(\u0022/DeepSeekForVisualStudio;V1.0.0.0;component/ui/promptdialog.xaml\u0022, System.UriKind.Relative);",
+            "protectedSnippet": "M:System.Uri.#ctor(System.String,System.UriKind)",
+            "label": "M:System.Uri.#ctor(System.String,System.UriKind)",
+            "properties": {
+              "CharCount": "3507"
+            },
+            "links": [
+              {
+                "title": "API \u6587\u6863",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/networking/10.0/uri-length-limits-removed.md",
+                "isCustom": false
+              }
+            ],
+            "line": 69,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "f29a3684-700b-4675-b49f-c540d5891fe0",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "viewmodel = (PromptDialogViewModel)DataContext;",
+              "protected": "P:System.Windows.FrameworkElement.DataContext"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\PromptDialog.xaml.cs",
+            "snippet": "viewmodel = (PromptDialogViewModel)DataContext;",
+            "protectedSnippet": "P:System.Windows.FrameworkElement.DataContext",
+            "label": "P:System.Windows.FrameworkElement.DataContext",
+            "properties": {
+              "CharCount": "531"
+            },
+            "line": 12,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "70b04917-5830-4a5c-9948-26ac99c014c7",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "public PromptDialog(DSHAskContext context, bool forceSelection = false)\r\n        {\r\n            InitializeComponent();\r\n            viewmodel = (PromptDialogViewModel)DataContext;\r\n            viewmodel.InitializeContext(context, forceSelection);\r\n        }",
+              "protected": "M:System.Windows.Window.#ctor"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\PromptDialog.xaml.cs",
+            "snippet": "public PromptDialog(DSHAskContext context, bool forceSelection = false)\r\n        {\r\n            InitializeComponent();\r\n            viewmodel = (PromptDialogViewModel)DataContext;\r\n            viewmodel.InitializeContext(context, forceSelection);\r\n        }",
+            "protectedSnippet": "M:System.Windows.Window.#ctor",
+            "label": "M:System.Windows.Window.#ctor",
+            "properties": {
+              "CharCount": "531"
+            },
+            "line": 9,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "724b8f30-c5dd-4c1a-97e5-054936d5bde4",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "viewmodel = (PromptDialogViewModel)DataContext;",
+              "protected": "P:System.Windows.FrameworkElement.DataContext"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\PromptDialog.xaml.cs",
+            "snippet": "viewmodel = (PromptDialogViewModel)DataContext;",
+            "protectedSnippet": "P:System.Windows.FrameworkElement.DataContext",
+            "label": "P:System.Windows.FrameworkElement.DataContext",
+            "properties": {
+              "CharCount": "531"
+            },
+            "line": 12,
+            "column": 12
+          }
+        },
+        {
+          "incidentId": "7b171d3c-b243-4c1e-9b70-33b57036fee4",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "public PromptDialog(DSHAskContext context, bool forceSelection = false)\r\n        {\r\n            InitializeComponent();\r\n            viewmodel = (PromptDialogViewModel)DataContext;\r\n            viewmodel.InitializeContext(context, forceSelection);\r\n        }",
+              "protected": "M:System.Windows.Window.#ctor"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\PromptDialog.xaml.cs",
+            "snippet": "public PromptDialog(DSHAskContext context, bool forceSelection = false)\r\n        {\r\n            InitializeComponent();\r\n            viewmodel = (PromptDialogViewModel)DataContext;\r\n            viewmodel.InitializeContext(context, forceSelection);\r\n        }",
+            "protectedSnippet": "M:System.Windows.Window.#ctor",
+            "label": "M:System.Windows.Window.#ctor",
+            "properties": {
+              "CharCount": "531"
+            },
+            "line": 9,
+            "column": 8
+          }
+        },
+        {
+          "incidentId": "b65dfb13-7880-4bb6-9828-aff5e27dd147",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "IComponentConnector",
+              "protected": "T:System.Windows.Markup.IComponentConnector"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\obj\\Debug\\net472\\UI\\PromptDialog.g.i.cs",
+            "snippet": "IComponentConnector",
+            "protectedSnippet": "T:System.Windows.Markup.IComponentConnector",
+            "label": "T:System.Windows.Markup.IComponentConnector",
+            "properties": {
+              "CharCount": "3507"
+            },
+            "line": 55,
+            "column": 85
+          }
+        },
+        {
+          "incidentId": "7d3a24ae-513a-4385-b1c0-f23b50fbc1a7",
+          "ruleId": "Api.0001",
+          "description": "API is unavailable in net8.0 ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "Window",
+              "protected": "T:System.Windows.Window"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\UI\\PromptDialog.xaml.cs",
+            "snippet": "Window",
+            "protectedSnippet": "T:System.Windows.Window",
+            "label": "T:System.Windows.Window",
+            "properties": {
+              "CharCount": "531"
+            },
+            "line": 5,
+            "column": 40
+          }
+        },
+        {
+          "incidentId": "98663cd8-3ee9-4279-ac53-acac7e8b91c7",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "client.Timeout = TimeSpan.FromSeconds(1.5);",
+              "protected": "M:System.TimeSpan.FromSeconds(System.Double)"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\Core\\DshRunner.cs",
+            "snippet": "client.Timeout = TimeSpan.FromSeconds(1.5);",
+            "protectedSnippet": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "label": "M:System.TimeSpan.FromSeconds(System.Double)",
+            "properties": {
+              "CharCount": "7529"
+            },
+            "links": [
+              {
+                "title": "API \u6587\u6863",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 39,
+            "column": 20
+          }
+        },
+        {
+          "incidentId": "11cb9ceb-f0a4-4a5c-ae08-9e5262f78dd0",
+          "ruleId": "Api.0002",
+          "description": "Breaking change: New TimeSpan.From*() overloads that take integers ",
+          "projectPath": "src\\DSH4VS\\DSH4VS.csproj",
+          "state": "Active",
+          "location": {
+            "snippetModel": {
+              "unrestricted": "client.Timeout = System.TimeSpan.FromMinutes(5);",
+              "protected": "M:System.TimeSpan.FromMinutes(System.Double)"
+            },
+            "kind": "File",
+            "path": "src\\DSH4VS\\Core\\DshLocator.cs",
+            "snippet": "client.Timeout = System.TimeSpan.FromMinutes(5);",
+            "protectedSnippet": "M:System.TimeSpan.FromMinutes(System.Double)",
+            "label": "M:System.TimeSpan.FromMinutes(System.Double)",
+            "properties": {
+              "CharCount": "11644"
+            },
+            "links": [
+              {
+                "title": "API \u6587\u6863",
+                "url": "https://github.com/dotnet/docs/blob/main/docs/core/compatibility/core-libraries/9.0/timespan-from-overloads.md",
+                "isCustom": false
+              }
+            ],
+            "line": 129,
+            "column": 20
+          }
+        }
+      ],
+      "features": [
+        {
+          "featureId": "Wpf",
+          "incidents": [
+            "b65dfb13-7880-4bb6-9828-aff5e27dd147",
+            "a31f0b16-c90a-4684-883e-826ba0d3920f",
+            "e8174d0a-62be-4193-ad01-edc58674bc04",
+            "75155b7a-efa0-4a45-b2a6-9e18fc4b9b90",
+            "7ba0a585-7074-4a9b-ba52-27aa486abd62",
+            "37032c35-a3c9-47a0-bc5c-72a462ddc3a8",
+            "5bd71206-fd22-4027-a975-3e685916e060",
+            "b2b166de-8d75-4642-9a77-c16adaa33e3a"
+          ]
+        }
+      ]
+    }
+  ],
+  "rules": {
+    "NuGet.0001": {
+      "id": "NuGet.0001",
+      "isFeature": false,
+      "description": "NuGet \u5305\u4E0E\u6240\u9009\u76EE\u6807\u6846\u67B6\u4E0D\u517C\u5BB9\u3002\n\n\u5305\u9700\u8981\u5347\u7EA7\u5230\u652F\u6301\u6240\u9009\u9879\u76EE\u76EE\u6807\u6846\u67B6\u7684\u7248\u672C\u3002\u5982\u679C\u6CA1\u6709\u652F\u6301\u65B0\u76EE\u6807\u6846\u67B6\u7684\u65B0\u5305\u7248\u672C\uFF0C\u5219\u9700\u8981\u4F7F\u7528\u4E0D\u540C\u7684\u5305\uFF0C\u5E76\u4E14\u6240\u6709\u4EE3\u7801\u90FD\u9700\u8981\u5347\u7EA7\u5230\u65B0\u7684 API\u3002",
+      "label": "NuGet \u5305\u4E0D\u517C\u5BB9",
+      "severity": "Mandatory",
+      "effort": 1,
+      "links": [
+        {
+          "url": "https://go.microsoft.com/fwlink/?linkid=2262529",
+          "isCustom": false
+        }
+      ]
+    },
+    "NuGet.0003": {
+      "id": "NuGet.0003",
+      "isFeature": false,
+      "description": "\u6846\u67B6\u5F15\u7528\u4E2D\u5305\u542B NuGet \u5305\u529F\u80FD\u3002\n\n\u9700\u8981\u79FB\u9664\u5305\u3002",
+      "label": "\u6846\u67B6\u5F15\u7528\u4E2D\u5305\u542B NuGet \u5305\u529F\u80FD",
+      "severity": "Mandatory",
+      "effort": 1,
+      "links": [
+        {
+          "url": "https://go.microsoft.com/fwlink/?linkid=2262609",
+          "isCustom": false
+        }
+      ]
+    },
+    "Project.0002": {
+      "id": "Project.0002",
+      "isFeature": false,
+      "description": "\u9700\u8981\u5C06\u9879\u76EE\u7684\u76EE\u6807\u6846\u67B6\u66F4\u6539\u4E3A\u5DF2\u4E3A\u6B64\u5347\u7EA7\u9009\u62E9\u7684\u65B0\u76EE\u6807\u6846\u67B6\u3002\n\n\u5728\u5347\u7EA7\u671F\u95F4\uFF0C\u76EE\u6807\u6846\u67B6\u5C06\u5728\u9002\u7528\u65F6\u8C03\u6574\u4E3A\u5BF9\u5E94\u7684\u5E73\u53F0\u3002\u5728\u67D0\u4E9B\u60C5\u51B5\u4E0B\uFF0C\u5982\u679C\u9879\u76EE\u4F7F\u7528\u7684\u529F\u80FD\u76EE\u524D\u5728\u65B0\u5F0F .NET Framework (windows\u3001iOS\u3001Android \u7B49)\u4E2D\u5177\u6709\u81EA\u5DF1\u7684\u5E73\u53F0\uFF0C\u5219\u5728\u5347\u7EA7\u540E\u9879\u76EE\u4F1A\u751F\u6210\u591A\u4E2A\u76EE\u6807\u6846\u67B6\u3002",
+      "label": "\u9700\u8981\u66F4\u6539\u9879\u76EE\u7684\u76EE\u6807\u6846\u67B6",
+      "severity": "Mandatory",
+      "effort": 1,
+      "links": [
+        {
+          "title": "\u4ECE .NET Framework \u79FB\u690D\u5230 .NET \u7684\u6982\u8FF0",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2265227",
+          "isCustom": false
+        },
+        {
+          "title": ".NET \u9879\u76EE SDK",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2265226",
+          "isCustom": false
+        }
+      ]
+    },
+    "Api.0001": {
+      "id": "Api.0001",
+      "isFeature": false,
+      "description": "API \u5BF9\u6240\u9009 .NET \u7248\u672C\u5B58\u5728\u4E8C\u8FDB\u5236\u4E0D\u517C\u5BB9\uFF1A\u5F71\u54CD\u73B0\u6709\u4E8C\u8FDB\u5236\u6587\u4EF6\uFF0C\u901A\u5E38\u9700\u8981\u91CD\u65B0\u7F16\u8BD1\uFF0C\u56E0\u4E3A API \u7684\u66F4\u6539\u5BFC\u81F4\u65E7\u4E8C\u8FDB\u5236\u6587\u4EF6\u65E0\u6CD5\u52A0\u8F7D\u6216\u6267\u884C\u3002",
+      "label": "\u5BF9\u6240\u9009 .NET \u7248\u672C\u4E8C\u8FDB\u5236\u4E0D\u517C\u5BB9",
+      "severity": "Mandatory",
+      "effort": 1,
+      "links": [
+        {
+          "title": ".NET \u4E2D\u7684\u4E2D\u65AD\u6027\u53D8\u66F4",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2262679",
+          "isCustom": false
+        }
+      ]
+    },
+    "Api.0003": {
+      "id": "Api.0003",
+      "isFeature": false,
+      "description": "API \u5728\u6240\u9009 .NET \u7248\u672C\u4E2D\u5B58\u5728\u884C\u4E3A\u53D8\u5316\uFF1A\u4EE3\u7801\u548C\u4E8C\u8FDB\u5236\u6587\u4EF6\u5728\u8FD0\u884C\u65F6\u7684\u8868\u73B0\u53EF\u80FD\u4E0D\u540C\uFF0C\u65E0\u9700\u91CD\u65B0\u7F16\u8BD1\uFF0C\u4F46\u65B0\u884C\u4E3A\u53EF\u80FD\u4E0D\u7406\u60F3\uFF0C\u9700\u8981\u8FDB\u884C\u66F4\u65B0\u3002",
+      "label": "\u6240\u9009 .NET \u7248\u672C\u4E2D\u7684\u884C\u4E3A\u53D8\u5316",
+      "severity": "Potential",
+      "effort": 1
+    },
+    "Api.0002": {
+      "id": "Api.0002",
+      "isFeature": false,
+      "description": "API \u5BF9\u6240\u9009 .NET \u7248\u672C\u5B58\u5728\u6E90\u4EE3\u7801\u4E0D\u517C\u5BB9\uFF1A\u5728\u9762\u5411\u65B0\u7248\u672C\u65F6\u9700\u8981\u4FEE\u6539\u4EE3\u7801\u624D\u80FD\u6210\u529F\u7F16\u8BD1\uFF0C\u4F8B\u5982\u79FB\u9664\u8FC7\u65F6\u7684 API \u6216\u66F4\u6539\u65B9\u6CD5\u7B7E\u540D\u3002",
+      "label": "\u5BF9\u6240\u9009 .NET \u7248\u672C\u6E90\u4EE3\u7801\u4E0D\u517C\u5BB9",
+      "severity": "Potential",
+      "effort": 1,
+      "links": [
+        {
+          "title": ".NET \u4E2D\u7684\u4E2D\u65AD\u6027\u53D8\u66F4",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2262679",
+          "isCustom": false
+        }
+      ]
+    },
+    "Wpf": {
+      "id": "Wpf",
+      "isFeature": false,
+      "description": "WPF APIs for building Windows desktop applications with XAML-based UI that are available in .NET on Windows. WPF provides rich desktop UI capabilities with data binding and styling. Enable Windows Desktop support: Option 1 (Recommended): Target net9.0-windows; Option 2: Add \u003CUseWindowsDesktop\u003Etrue\u003C/UseWindowsDesktop\u003E.",
+      "label": "WPF (Windows Presentation Foundation)",
+      "severity": "Mandatory",
+      "effort": 1,
+      "links": [
+        {
+          "title": "WPF on .NET",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2342008",
+          "isCustom": false
+        }
+      ]
+    }
+  }
+}
