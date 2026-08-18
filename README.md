@@ -22,7 +22,7 @@ DSH 官方提供两个可编程入口，本扩展只做"包装"：
 工作目录 = 解决方案目录 → 项目目录 → 文件目录，DSH 的 fs/工具以此为准。
 
 ## 预览
-
+![初始化预览](InitializePreview.png)
 ![DSH4VS 预览](Preview.png)
 
 ## 前置条件

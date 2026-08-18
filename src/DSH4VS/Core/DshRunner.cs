@@ -235,17 +235,13 @@ namespace DSH4VS.Core
                 return 0;
             }
 
-            var runtimePatchPath = autoLoadPlugin ? PrepareRuntimePatch(output) : null;
-            var patchArgument = runtimePatchPath == null
-                ? string.Empty
-                : " --patch " + QuoteArgument(runtimePatchPath);
             output.WriteLine($"[DSH] 启动 Web UI（端口 {port}）…");
             try
             {
                 var psi = new ProcessStartInfo
                 {
                     FileName = exe.FileName,
-                    Arguments = exe.ArgumentsPrefix + patchArgument + $" --port {port}",
+                    Arguments = exe.ArgumentsPrefix + $" --port {port}",
                     WorkingDirectory = Environment.CurrentDirectory,
                     UseShellExecute = false,
                     CreateNoWindow = true,
@@ -369,32 +365,6 @@ namespace DSH4VS.Core
             {
                 output.WriteLine("[DSH] 安装 Harness bundle 失败: " + ex.Message);
                 return false;
-            }
-        }
-
-        /// <summary>为当前动态桥接端口生成 Harness 配置覆盖层。</summary>
-        /// <param name="output">用于记录生成失败信息的输出通道。</param>
-        /// <returns>运行时 patch 路径；生成失败时返回空值。</returns>
-        private static string PrepareRuntimePatch(IDshOutput output)
-        {
-            try
-            {
-                var patchPath = Path.Combine(Path.GetTempPath(), "DSH4VS", "visual-studio-context-runtime.yml");
-                Directory.CreateDirectory(Path.GetDirectoryName(patchPath));
-                var bridgeUrl = DshContextBridge.Endpoint.Replace("'", "''");
-                var patch = "- insert:\n"
-                    + "    - id: dsh4vs-visual-studio-context\n"
-                    + "      name: dsh4vs-visual-studio-context\n"
-                    + "      config:\n"
-                    + "        bridgeUrl: '" + bridgeUrl + "'\n"
-                    + "        timeoutMs: 2000\n";
-                File.WriteAllText(patchPath, patch);
-                return patchPath;
-            }
-            catch (Exception ex)
-            {
-                output.WriteLine("[DSH] 生成上下文运行时配置失败: " + ex.Message);
-                return null;
             }
         }
 
