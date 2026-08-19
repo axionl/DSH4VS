@@ -46,12 +46,14 @@
     <Grid ClipToBounds="True" MinWidth="0" MinHeight="0" Background="WhiteSmoke">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="16"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="12"/>
-                    <RowDefinition Height="Auto"/>
-                     <RowDefinition Height="12"/>
-                     <RowDefinition Height="Auto"/>
+            <RowDefinition Height="6"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="4"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="4"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="4"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <wv2:WebView2 x:Name="Browser"
@@ -59,16 +61,16 @@
                       Source="{Binding BrowserSource}"
                       Visibility="{Binding BrowserVisibility}"/>
         <Border Grid.Row="0" Background="WhiteSmoke" ClipToBounds="True"
-                Visibility="{Binding OverlayVisibility}">
+                    Visibility="{Binding OverlayVisibility}">
             <Grid MaxWidth="480" MinWidth="0" HorizontalAlignment="Center"
-                  VerticalAlignment="Center">
+                        VerticalAlignment="Center">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="16"/>
+                    <RowDefinition Height="8"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="16"/>
+                    <RowDefinition Height="8"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="16"/>
+                    <RowDefinition Height="8"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <TextBlock Grid.Row="0" Text="DSH Web UI 未运行"
@@ -83,12 +85,12 @@
                 <Grid Grid.Row="6">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="16"/>
+                    <RowDefinition Height="8"/>
                         <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="12"/>
+                    <RowDefinition Height="6"/>
                         <RowDefinition Height="Auto"/>
-                         <RowDefinition Height="12"/>
-                         <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="6"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <TextBox Grid.Row="0" Text="{Binding WebOutput}" IsReadOnly="True"
                              Height="96" Padding="8,4" TextWrapping="Wrap"
@@ -109,7 +111,7 @@
                                  Style="{StaticResource DshTextBoxStyle}"/>
                         <TextBox Grid.Column="2" Text="{Binding WebPort, UpdateSourceTrigger=PropertyChanged}"
                                  Width="72" Padding="8,4" VerticalContentAlignment="Center"
-                                 ToolTip="Web UI 监听端口，默认 3080"
+                                  ToolTip="Web UI 监听端口，默认 13080"
                                  Style="{StaticResource DshTextBoxStyle}"/>
                         <Button Grid.Column="4" Command="{Binding CopyWebCommand}"
                                 Content="复制命令" Style="{StaticResource DshButtonStyle}"/>
@@ -118,58 +120,97 @@
                               Content="自动加载 Visual Studio Harness 插件"
                               HorizontalAlignment="Left"
                               ToolTip="启动 DSH Web UI 时自动安装并加载本地 Visual Studio 插件"/>
-                     <StackPanel Grid.Row="6">
-                         <TextBlock Text="运行环境：" FontWeight="SemiBold"/>
-                         <TextBlock Text="{Binding EnvironmentStatus}" Margin="0,4,0,8"
+                    <StackPanel Grid.Row="6">
+                        <TextBlock Text="运行环境：" FontWeight="SemiBold"/>
+                        <TextBlock Text="{Binding EnvironmentStatus}" Margin="0,4,0,8"
                                     TextWrapping="Wrap"/>
-                          <WrapPanel>
-                             <Button Command="{Binding CheckEnvironmentCommand}" Content="重新检查"
-                                     Margin="0,0,8,0" Style="{StaticResource DshButtonStyle}"/>
-                             <Button Command="{Binding InstallNodeCommand}" Content="安装 Node.js"
-                                     Margin="0,0,8,0" Style="{StaticResource DshButtonStyle}"/>
-                             <Button Command="{Binding InstallDshCommand}" Content="安装 DSH"
-                                     Style="{StaticResource DshButtonStyle}"/>
-                          </WrapPanel>
-                     </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" Command="{Binding CheckEnvironmentCommand}" Content="重新检查"
+                                    Margin="0,0,4,0" HorizontalAlignment="Stretch"
+                                    Style="{StaticResource DshButtonStyle}"/>
+                            <Button Grid.Column="1" Command="{Binding InstallNodeCommand}" Content="安装 Node.js"
+                                    Margin="4,0" HorizontalAlignment="Stretch"
+                                    Style="{StaticResource DshButtonStyle}"/>
+                            <Button Grid.Column="2" Command="{Binding InstallDshCommand}" Content="安装 DSH"
+                                    Margin="4,0,0,0" HorizontalAlignment="Stretch"
+                                    Style="{StaticResource DshButtonStyle}"/>
+                        </Grid>
+                        <TextBlock Text="DSH 路径：" Margin="0,8,0,4"
+                                   FontWeight="SemiBold"/>
+                        <TextBox Text="{Binding DshPath}" IsReadOnly="True"
+                                 Padding="8,4" VerticalContentAlignment="Center"
+                                 ToolTip="DSH 命令可执行程序或脚本的所在位置"
+                                 Style="{StaticResource DshTextBoxStyle}"/>
+                    </StackPanel>
                 </Grid>
             </Grid>
         </Border>
 
-        <Border Grid.Row="2" Background="WhiteSmoke" Padding="12,8"
+        <Border Grid.Row="2" Background="WhiteSmoke" Padding="8,2"
                 ClipToBounds="True" Visibility="{Binding BrowserVisibility}">
             <ScrollViewer HorizontalScrollBarVisibility="Auto"
                           VerticalScrollBarVisibility="Disabled">
                 <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="16"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="16"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="16"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="16"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="16"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="16"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="DSH Web UI" VerticalAlignment="Center"
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="DSH Web UI" VerticalAlignment="Center"
                            FontWeight="SemiBold"/>
-                <TextBlock Grid.Column="2" Text="{Binding WebAddress}"
+                    <TextBlock Grid.Column="2" Text="{Binding WebAddress}"
                            VerticalAlignment="Center"/>
-                <TextBlock Grid.Column="4" Text="{Binding DshVersion}"
+                    <TextBlock Grid.Column="4" Text="{Binding DshVersion}"
                            VerticalAlignment="Center"/>
-                <TextBlock Grid.Column="6" Text="{Binding WebProcessId}"
+                    <TextBlock Grid.Column="6" Text="{Binding WebProcessId}"
                            VerticalAlignment="Center"/>
-                <TextBlock Grid.Column="8" Text="DSH 路径：" Padding="8,4" VerticalAlignment="Center"/>
-                <TextBox Grid.Column="10" Text="{Binding DshPath}" IsReadOnly="True"
-                         MaxWidth="320" Padding="8,4" VerticalContentAlignment="Center"
-                         ToolTip="DSH 命令可执行程序或脚本的所在位置"
-                         Style="{StaticResource DshTextBoxStyle}"/>
-                <Button Grid.Column="12" Command="{Binding StopWebCommand}"
+                    <Button Grid.Column="8" Command="{Binding StopWebCommand}"
                         Content="停止 DSH Web UI" Style="{StaticResource DshButtonStyle}"/>
+                </Grid>
+            </ScrollViewer>
+        </Border>
+
+        <Border Grid.Row="4" Background="Gainsboro" Padding="8,2" ClipToBounds="True">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Disabled">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="6"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Ellipse Grid.Column="0" Width="4" Height="4"
+                             VerticalAlignment="Center"
+                             ToolTip="{Binding ActiveContextState}">
+                        <Ellipse.Style>
+                            <Style TargetType="Ellipse">
+                                <Setter Property="Fill" Value="#9E9E9E"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ActiveContextState}" Value="connected">
+                                        <Setter Property="Fill" Value="#1ABC9C"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ActiveContextState}" Value="notconnected">
+                                        <Setter Property="Fill" Value="#F39C12"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Ellipse.Style>
+                    </Ellipse>
+                    <TextBlock Grid.Column="2" Text="{Binding ActiveContextStatus}"
+                               VerticalAlignment="Center"
+                               TextWrapping="NoWrap"
+                               ToolTip="当前 Visual Studio 活动上下文"/>
                 </Grid>
             </ScrollViewer>
         </Border>

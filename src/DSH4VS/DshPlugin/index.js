@@ -5,7 +5,7 @@ export const name = 'dsh4vs-visual-studio-context'
 export const inject = ['tools']
 
 export const Config = Schema.object({
-  bridgeUrl: Schema.string().default('http://127.0.0.1:3091/api/visual-studio/context'),
+  bridgeUrl: Schema.string().default('http://127.0.0.1:13091/api/visual-studio/context'),
   timeoutMs: Schema.number().default(2000),
 })
 
@@ -16,7 +16,6 @@ export function apply(ctx, config) {
     parameters: {
       mode: {
         type: 'string',
-        required: false,
         description: '使用 active_document 获取活动文件和内容，使用 cursor_position 获取光标、选区和当前行。',
       },
     },
@@ -24,10 +23,11 @@ export function apply(ctx, config) {
       schema: { type: 'string' },
       render: (_args, value) => [{ type: 'text', text: value }],
     },
-    async execute(args) {
+    async execute(args = {}, exec) {
       try {
+        const signal = exec?.signal ?? AbortSignal.timeout(config.timeoutMs)
         const response = await fetch(config.bridgeUrl, {
-          signal: AbortSignal.timeout(config.timeoutMs),
+          signal,
         })
         if (!response.ok) {
           return `无法读取 Visual Studio 上下文：桥接服务返回 HTTP ${response.status}。`

@@ -1,9 +1,9 @@
 {
-  "DSH.Commands.AskDsh.DisplayName": "Ask DSH…",
-  "DSH.Commands.AskDshSelection.DisplayName": "Ask DSH about selection",
-  "DSH.Commands.CancelDsh.DisplayName": "Cancel DSH Task",
-  "DSH.Commands.OpenDshWeb.DisplayName": "Open DSH Web UI",
-  "DSH.Commands.StopDshWeb.DisplayName": "Stop DSH Web UI",
-  "DSH.Commands.SyncDshDocument.DisplayName": "Sync active document to DSH",
-  "DSH.Commands.SyncDshCursor.DisplayName": "Sync cursor position to DSH"
+  "DSH.Commands.AskDsh.DisplayName": "询问 DSH…",
+  "DSH.Commands.AskDshSelection.DisplayName": "询问 DSH 关于选中内容",
+  "DSH.Commands.CancelDsh.DisplayName": "取消 DSH 任务",
+  "DSH.Commands.OpenDshWeb.DisplayName": "打开 DSH Web UI",
+  "DSH.Commands.StopDshWeb.DisplayName": "停止 DSH Web UI",
+  "DSH.Commands.SyncDshDocument.DisplayName": "同步活动文档到 DSH",
+  "DSH.Commands.SyncDshCursor.DisplayName": "同步光标位置到 DSH"
 }

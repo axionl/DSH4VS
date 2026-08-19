@@ -2,5 +2,5 @@
     - id: dsh4vs-visual-studio-context
       name: dsh4vs-visual-studio-context
       config:
-        bridgeUrl: 'http://127.0.0.1:3091/api/visual-studio/context'
+        bridgeUrl: 'http://127.0.0.1:13091/api/visual-studio/context'
         timeoutMs: 2000

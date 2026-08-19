@@ -12,7 +12,7 @@ namespace DSH4VS.Core
     {
         #region 常量
 
-        private static readonly TimeSpan PollInterval = TimeSpan.FromMilliseconds(800);
+        private static readonly TimeSpan PollInterval = TimeSpan.FromMilliseconds(1000);
 
         #endregion
 

@@ -1,8 +1,6 @@
 using System;
 using System.IO;
 using System.Net;
-using System.Net.Sockets;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,12 +11,18 @@ namespace DSH4VS.Core
     /// <summary>
     /// 在 Visual Studio 与 DeepSeek Harness 插件之间传递最新编辑器上下文的本地桥接服务。
     /// </summary>
+    /// <remarks>
+    /// 监听端口固定为 <see cref="Port" />，与插件配置中的 <c>bridgeUrl</c>（硬编码为
+    /// <c>http://127.0.0.1:13091/api/visual-studio/context</c>）保持一致。
+    /// 使用 .NET 内置 <see cref="HttpListener" /> 提供标准 HTTP 服务，端口被占用时启动失败
+    /// 会在输出窗格明确报错，而不是静默换端口。
+    /// </remarks>
     internal static class DshContextBridge
     {
         #region 常量
 
-        /// <summary>桥接服务实际使用的回环端口。</summary>
-        public static int Port { get; private set; } = 3091;
+        /// <summary>桥接服务实际使用的回环端口（与插件 bridgeUrl 保持一致）。</summary>
+        public const int Port = 13091;
 
         /// <summary>Harness 插件读取上下文的 endpoint。</summary>
         public static string Endpoint => "http://127.0.0.1:" + Port + "/api/visual-studio/context";
@@ -49,12 +53,6 @@ namespace DSH4VS.Core
 
                 try
                 {
-                    Port = FindAvailablePort(3091);
-                    if (Port == 0)
-                    {
-                        throw new InvalidOperationException("没有可用的上下文桥接端口。");
-                    }
-
                     listener = new HttpListener();
                     listener.Prefixes.Add("http://127.0.0.1:" + Port + "/");
                     listener.Start();
@@ -64,10 +62,7 @@ namespace DSH4VS.Core
                 }
                 catch (Exception ex)
                 {
-                    listener?.Close();
-                    listener = null;
-                    listenerCts?.Dispose();
-                    listenerCts = null;
+                    StopListener();
                     output?.WriteLine("[DSH] 上下文桥接启动失败: " + ex.Message);
                 }
             }
@@ -78,12 +73,18 @@ namespace DSH4VS.Core
         {
             lock (syncRoot)
             {
-                listenerCts?.Cancel();
-                listenerCts?.Dispose();
-                listenerCts = null;
-                listener?.Close();
-                listener = null;
+                StopListener();
             }
+        }
+
+        /// <summary>释放监听器及其取消令牌（调用方需持有 <see cref="syncRoot" /> 锁）。</summary>
+        private static void StopListener()
+        {
+            listenerCts?.Cancel();
+            listenerCts?.Dispose();
+            listenerCts = null;
+            listener?.Stop();
+            listener = null;
         }
 
         #endregion
@@ -124,48 +125,20 @@ namespace DSH4VS.Core
 
         #region HTTP 服务
 
-        private static int FindAvailablePort(int preferredPort)
-        {
-            var startPort = preferredPort is >= 1024 and <= 65535 ? preferredPort : 3091;
-            for (var port = startPort; port <= 65535; port++)
-            {
-                try
-                {
-                    using var probe = new TcpListener(IPAddress.Loopback, port);
-                    probe.Start();
-                    probe.Stop();
-                    return port;
-                }
-                catch (SocketException)
-                {
-                }
-            }
-
-            return 0;
-        }
-
+        /// <summary>
+        /// 异步监听服务
+        /// </summary>
+        /// <param name="activeListener"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         private static async Task ListenAsync(HttpListener activeListener, CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)
             {
+                HttpListenerContext context;
                 try
                 {
-                    var getContextTask = activeListener.GetContextAsync();
-                    var completed = await Task.WhenAny(getContextTask, Task.Delay(Timeout.Infinite, cancellationToken));
-                    if (completed != getContextTask)
-                    {
-                        return;
-                    }
-
-                    var httpContext = await getContextTask;
-                    var response = httpContext.Response;
-                    response.StatusCode = 200;
-                    response.ContentType = "application/json; charset=utf-8";
-                    response.Headers["Cache-Control"] = "no-store";
-                    var bytes = Encoding.UTF8.GetBytes(Volatile.Read(ref snapshotJson));
-                    response.ContentLength64 = bytes.Length;
-                    await response.OutputStream.WriteAsync(bytes, 0, bytes.Length, cancellationToken);
-                    response.Close();
+                    context = await activeListener.GetContextAsync();
                 }
                 catch (OperationCanceledException)
                 {
@@ -175,13 +148,69 @@ namespace DSH4VS.Core
                 {
                     return;
                 }
-                catch
+                catch (ObjectDisposedException)
                 {
-                    // 单个请求失败不应使桥接服务停止。
+                    return;
                 }
+
+                _ = HandleRequestAsync(context, cancellationToken);
             }
         }
 
+        /// <summary>处理单个 HTTP 请求并返回当前快照 JSON。</summary>
+        /// <param name="context">已接受的 HTTP 请求上下文。</param>
+        /// <param name="cancellationToken">取消标记。</param>
+        private static async Task HandleRequestAsync(
+            HttpListenerContext context, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var request = context.Request;
+                var response = context.Response;
+                response.Headers["Cache-Control"] = "no-store";
+                response.Headers["Access-Control-Allow-Origin"] = "*";
+                response.Headers["Access-Control-Allow-Methods"] = "GET, OPTIONS";
+                response.Headers["Access-Control-Allow-Headers"] = "Content-Type";
+
+                if (string.Equals(request.HttpMethod, "OPTIONS", StringComparison.OrdinalIgnoreCase))
+                {
+                    response.StatusCode = 204;
+                    response.Close();
+                    return;
+                }
+
+                if (!string.Equals(request.HttpMethod, "GET", StringComparison.OrdinalIgnoreCase)
+                    || !request.Url.AbsolutePath.EndsWith(
+                        "/api/visual-studio/context", StringComparison.OrdinalIgnoreCase))
+                {
+                    response.StatusCode = 404;
+                    response.Close();
+                    return;
+                }
+
+                var body = System.Text.Encoding.UTF8.GetBytes(Volatile.Read(ref snapshotJson));
+                response.StatusCode = 200;
+                response.ContentType = "application/json; charset=utf-8";
+                response.ContentLength64 = body.Length;
+                await response.OutputStream.WriteAsync(body, 0, body.Length, cancellationToken);
+                response.Close();
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (IOException)
+            {
+            }
+            catch (HttpListenerException)
+            {
+            }
+        }
+
+        /// <summary>
+        /// 读取文件内容
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
         private static string ReadFileContent(string filePath)
         {
             if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))

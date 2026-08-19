@@ -53,6 +53,7 @@ namespace DSH4VS.Commands
         public override CommandConfiguration CommandConfiguration =>
             new("%DSH.Commands.SyncDshDocument.DisplayName%")
             {
+                ClientContexts = [ClientContextCategory.Shell, ClientContextCategory.Editor],
                 Placements = [CommandPlacement.KnownPlacements.ExtensionsMenu],
                 Icon = new CommandIconConfiguration(ImageMoniker.KnownValues.Document,
                     IconSettings.None)
@@ -84,6 +85,7 @@ namespace DSH4VS.Commands
         public override CommandConfiguration CommandConfiguration =>
             new("%DSH.Commands.SyncDshCursor.DisplayName%")
             {
+                ClientContexts = [ClientContextCategory.Shell, ClientContextCategory.Editor],
                 Placements = [CommandPlacement.KnownPlacements.ExtensionsMenu],
                 Icon = new CommandIconConfiguration(ImageMoniker.KnownValues.Select,
                     IconSettings.None)
@@ -294,10 +296,12 @@ namespace DSH4VS.Commands
                 DshContextBridge.Start(output);
                 var askContext = await DshContextBridge.SyncAsync(
                     context.Extensibility, context, cancellationToken);
+                DshWebWindowViewModel.ReportContextSyncResult(askContext, null, kind);
                 output.WriteLine($"[DSH] 已同步{kind}: {askContext.FilePath ?? "无活动文档"}");
             }
             catch (Exception ex)
             {
+                DshWebWindowViewModel.ReportContextSyncResult(null, ex, kind);
                 await LogAsync(context, ex);
             }
         }

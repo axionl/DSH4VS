@@ -11,7 +11,7 @@ namespace DSH4VS.Core
 {
     /// <summary>
     /// 运行 DSH CLI：使用 `dsh --profile headless "<task>"` 执行一次性 Agent 任务，
-    /// 使用 `dsh --profile web --port 3080` 启动嵌入式 Web UI。标准输出和标准错误
+    /// 使用 `dsh --profile web --port 13080` 启动嵌入式 Web UI。标准输出和标准错误
     /// 会流式写入 Visual Studio 的“DSH”输出窗格，任务支持取消。
     /// </summary>
     public static class DshRunner
@@ -21,12 +21,12 @@ namespace DSH4VS.Core
         /// <summary>
         /// DSH Web UI 的本地访问地址。
         /// </summary>
-        public const string WebUrl = "http://127.0.0.1:3080";
+        public const string WebUrl = "http://127.0.0.1:13080";
 
         /// <summary>
         /// DSH Web UI 使用的本地端口。
         /// </summary>
-        public const int WebPort = 3080;
+        public const int WebPort = 13080;
 
         /// <summary>Windows 命令行工具常用的系统代码页，用于读取 pnpm/cmd 输出。</summary>
         private static System.Text.Encoding DshProcessEncoding =>
@@ -69,6 +69,7 @@ namespace DSH4VS.Core
         private static CancellationTokenSource currentCts;
         private static Process webProcess;
         private static string pnpmShimDirectory;
+        private static int webPort = WebPort;
 
         static DshRunner()
         {
@@ -110,14 +111,22 @@ namespace DSH4VS.Core
         }
 
         /// <summary>
-        /// 停止由当前扩展启动的 DSH Web UI 服务。
+        /// 按 Web UI 监听端口停止 DSH Web UI 服务，不区分进程是否由当前扩展启动。
         /// </summary>
-        /// <returns>如果扩展持有并停止了 Web 进程，则返回 <see langword="true" />。</returns>
-        public static bool StopWeb()
+        /// <param name="port">需要停止的 Web UI 监听端口。</param>
+        /// <returns>如果找到并停止了监听进程，则返回 <see langword="true" />。</returns>
+        public static bool StopWeb(int port = 0)
         {
             var process = webProcess;
             webProcess = null;
+            var targetPort = port is >= 1 and <= 65535 ? port : webPort;
+            webPort = WebPort;
             DshContextBridge.Stop();
+            if (process == null)
+            {
+                process = FindListeningProcess(targetPort);
+            }
+
             if (process == null)
             {
                 return false;
@@ -191,7 +200,7 @@ namespace DSH4VS.Core
         }
 
         /// <summary>
-        /// 确保 dsh web profile 在 3080 端口监听；如未运行则启动它。
+        /// 确保 dsh web profile 在 13080 端口监听；如未运行则启动它。
         /// </summary>
         /// <param name="output">输出通道。</param>
         /// <param name="port">Web UI 监听端口。</param>
@@ -224,6 +233,7 @@ namespace DSH4VS.Core
             }
             if (await IsWebUpAsync(port))
             {
+                    webPort = port;
                 output.WriteLine($"[DSH] Web UI 已在运行: {GetWebUrl(port)}");
                 return port;
             }
@@ -282,9 +292,11 @@ namespace DSH4VS.Core
                 await Task.Delay(750);
                 if (await IsWebUpAsync(port))
                 {
+                    webPort = port;
                     output.WriteLine($"[DSH] Web UI 就绪: {GetWebUrl(port)}");
                     return port;
                 }
+
             }
             output.WriteLine("[DSH] 等待 Web UI 超时。请检查 DSH 输出中的启动错误。");
             return 0;
@@ -378,55 +390,49 @@ namespace DSH4VS.Core
         }
 
         /// <summary>
-        /// 计算传递给 `dsh plugin add` 的 bundle 安装路径。pnpm 在 Windows 上由
-        /// cmd.exe 以 shell 方式转发参数，路径中的空格、括号等特殊字符会被 cmd
-        /// 拆成多个参数（例如 VSIX 安装在 "...\Extensions\Ariel AxionL
-        /// (i@axionl.me)\DSH for Visual Studio\..." 下时会直接报
-        /// "\DSH was unexpected at this time"）。因此当原路径含有此类字符时，
-        /// 先把 bundle 复制到不含特殊字符的固定目录再使用。
+        /// 计算传递给 `dsh plugin add` 的 bundle 安装路径。统一把 bundle 复制到
+        /// profile 目录下的固定子目录，原因有二：
+        /// 1) pnpm 在 Windows 上由 cmd.exe 以 shell 方式转发参数，路径中的空格、
+        ///    括号等特殊字符会被 cmd 拆成多个参数（例如 VSIX 安装在
+        ///    "...\Extensions\Ariel AxionL (i@axionl.me)\..." 下时会报
+        ///    "\DSH was unexpected at this time"）；复制到固定路径后不再含特殊字符。
+        /// 2) DSH 加载 bundle 时按 Node 规则从 bundle「真实目录」向上查找依赖，
+        ///    只有落到 $DSH_HOME/profiles/node_modules 这个共享依赖镜像才能解析
+        ///    @deepseek-ai/schemastery 等运行期依赖；把 bundle 放在 profile 目录
+        ///    之下（真实路径位于 profiles\ 内）才能命中该镜像。
         /// </summary>
-        /// <param name="output">用于记录复制过程的输出通道。</param>
-        /// <returns>可直接传给 pnpm 的干净路径。</returns>
+        /// <param name="output">用于记录复制失败的输出通道。</param>
+        /// <returns>profile 内可用的 bundle 安装路径。</returns>
         private static string GetBundleInstallPath(IDshOutput output)
         {
             var source = GetBundlePath();
-            if (!PathHasCmdUnsafeChars(source))
-            {
-                return source;
-            }
-
-            var stageRoot = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "DSH4VS", "bundle");
+            var stageRoot = Path.Combine(GetProfileDirectory(), "plugins", "dsh4vs-visual-studio-context");
             try
             {
                 Directory.CreateDirectory(stageRoot);
                 CopyDirectoryContents(source, stageRoot, overwrite: true);
-                output.WriteLine("[DSH] bundle 路径包含 shell 特殊字符，已复制安装源到 " + stageRoot);
                 return stageRoot;
             }
             catch (Exception ex)
             {
-                output.WriteLine("[DSH] 复制 bundle 到干净路径失败: " + ex.Message + "，直接使用原路径。");
+                output.WriteLine("[DSH] 复制 bundle 到 profile 失败: " + ex.Message + "，直接使用原路径。");
                 return source;
             }
         }
 
-        /// <summary>判断路径中是否包含会被 cmd.exe 特殊处理的字符。</summary>
-        /// <param name="path">待检查的路径。</param>
-        /// <returns>包含特殊字符时返回 <see langword="true" />。</returns>
-        private static bool PathHasCmdUnsafeChars(string path)
+        /// <summary>解析 dsh4vs profile 目录（与 DSH 的 resolveDshHome 规则一致）。</summary>
+        /// <returns>profile 目录的绝对路径。</returns>
+        private static string GetProfileDirectory()
         {
-            foreach (var c in path)
+            var home = Environment.GetEnvironmentVariable("DSH_HOME");
+            if (string.IsNullOrWhiteSpace(home))
             {
-                if (char.IsWhiteSpace(c)
-                    || c is '&' or '|' or '<' or '>' or '(' or ')' or '^' or '%' or '!' or '\'' or '`' or '"' or ',')
-                {
-                    return true;
-                }
+                home = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                    ".dsh");
             }
 
-            return false;
+            return Path.Combine(home, "profiles", "dsh4vs");
         }
 
         /// <summary>把源目录的全部内容复制到目标目录。</summary>
@@ -681,6 +687,72 @@ namespace DSH4VS.Core
                 currentProcess = null;
                 currentCts = null;
             }
+        }
+
+        /// <summary>查找指定 TCP 端口的监听进程。</summary>
+        /// <param name="port">需要查找的本地监听端口。</param>
+        /// <returns>监听进程；未找到或无法读取时返回空值。</returns>
+        private static Process FindListeningProcess(int port)
+        {
+            if (port is < 1 or > 65535)
+            {
+                return null;
+            }
+
+            try
+            {
+                using var netstat = Process.Start(new ProcessStartInfo
+                {
+                    FileName = "netstat.exe",
+                    Arguments = "-ano -p tcp",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                });
+                if (netstat == null)
+                {
+                    return null;
+                }
+
+                var output = netstat.StandardOutput.ReadToEnd();
+                netstat.WaitForExit(2000);
+                foreach (var line in output.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var parts = line.Trim().Split((char[])null, StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length < 5 || !string.Equals(parts[0], "TCP", StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    var localEndpoint = parts[1];
+                    var state = parts[^2];
+                    if ((!state.Contains("LISTEN", StringComparison.OrdinalIgnoreCase)
+                            && !state.Contains("侦听", StringComparison.OrdinalIgnoreCase))
+                        || !localEndpoint.EndsWith(":" + port, StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    if (int.TryParse(parts[^1], out var processId))
+                    {
+                        try
+                        {
+                            return Process.GetProcessById(processId);
+                        }
+                        catch
+                        {
+                            return null;
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // netstat 不可用或进程已退出时不影响停止流程。
+            }
+
+            return null;
         }
 
         #endregion

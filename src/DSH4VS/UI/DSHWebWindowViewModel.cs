@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,6 +16,19 @@ namespace DSH4VS.UI
     [DataContract]
     public sealed class DshWebWindowViewModel : NotifyPropertyChangedObject
     {
+        #region 常量
+
+        /// <summary>上下文同步服务已连接（状态灯：青绿色）。</summary>
+        private const string ContextStateConnected = "connected";
+
+        /// <summary>上下文同步服务未连接（状态灯：橘黄色）。</summary>
+        private const string ContextStateNotConnected = "notconnected";
+
+        /// <summary>上下文同步功能未启用（状态灯：灰色）。</summary>
+        private const string ContextStateDisabled = "disabled";
+
+        #endregion
+
         #region 私有字段
 
         private string detail = "正在检查 DSH Web UI…";
@@ -32,7 +45,7 @@ namespace DSH4VS.UI
 
         private string dshVersion = "版本：检查中…";
 
-        private string webCommand = "npx --yes @deepseek-ai/dsh web --port 3080";
+        private string webCommand = "npx --yes @deepseek-ai/dsh web --port 13080";
 
         private string webPort = DshRunner.WebPort.ToString();
 
@@ -46,9 +59,15 @@ namespace DSH4VS.UI
 
         private string environmentStatus = "正在检查 Node.js、npx 和 DSH 环境…";
 
+        private string activeContextStatus = "活动上下文：尚未同步";
+
+        private string activeContextState = ContextStateDisabled;
+
         private readonly VisualStudioExtensibility extensibility;
 
         private static IClientContext latestClientContext;
+
+        private static DshWebWindowViewModel latestInstance;
 
         private IClientContext clientContext;
 
@@ -64,6 +83,10 @@ namespace DSH4VS.UI
         {
             this.extensibility = extensibility;
             this.clientContext = clientContext ?? latestClientContext;
+            latestInstance = this;
+            activeContextState = (autoLoadPlugin && this.clientContext != null)
+                ? ContextStateNotConnected
+                : ContextStateDisabled;
             StartWebCommand = new AsyncCommand(StartWebAsync);
             StopWebCommand = new AsyncCommand(StopWebAsync);
             CopyWebCommand = new AsyncCommand(CopyWebCommandAsync);
@@ -80,6 +103,25 @@ namespace DSH4VS.UI
             private set => SetProperty(ref environmentStatus, value);
         }
 
+        /// <summary>显示当前 Visual Studio 活动文件、光标位置和选中文本状态。</summary>
+        [DataMember]
+        public string ActiveContextStatus
+        {
+            get => activeContextStatus;
+            private set => SetProperty(ref activeContextStatus, value);
+        }
+
+        /// <summary>
+        /// 活动上下文状态灯颜色标识：<c>connected</c>（青绿色）表示同步服务已连接，
+        /// <c>notconnected</c>（橘黄色）表示未连接，<c>disabled</c>（灰色）表示未启用。
+        /// </summary>
+        [DataMember]
+        public string ActiveContextState
+        {
+            get => activeContextState;
+            private set => SetProperty(ref activeContextState, value);
+        }
+
         /// <summary>是否在启动 Web UI 时自动安装并加载 Visual Studio Harness 插件。</summary>
         [DataMember]
         public bool AutoLoadPlugin
@@ -90,6 +132,9 @@ namespace DSH4VS.UI
                 if (SetProperty(ref autoLoadPlugin, value))
                 {
                     UpdateWebConfiguration();
+                    ActiveContextState = value
+                        ? ContextStateNotConnected
+                        : ContextStateDisabled;
                 }
             }
         }
@@ -99,6 +144,31 @@ namespace DSH4VS.UI
         public static void SetLatestClientContext(IClientContext context)
         {
             latestClientContext = context;
+        }
+
+        /// <summary>将菜单命令的上下文同步结果更新到当前工具窗口。</summary>
+        /// <param name="context">同步得到的 Visual Studio 上下文；失败时可以为空。</param>
+        /// <param name="error">同步失败原因；成功时为空。</param>
+        /// <param name="kind">同步类型，例如活动文档或光标位置。</param>
+        public static void ReportContextSyncResult(
+            DSHAskContext context, Exception error, string kind)
+        {
+            var instance = latestInstance;
+            if (instance == null)
+            {
+                return;
+            }
+
+            if (error == null)
+            {
+                instance.ActiveContextStatus = FormatContextStatus(context)
+                    + " | 已同步" + kind;
+                instance.ActiveContextState = ContextStateConnected;
+                return;
+            }
+
+            instance.ActiveContextState = ContextStateNotConnected;
+            instance.ActiveContextStatus = "活动上下文：同步" + kind + "失败：" + error.Message;
         }
 
         /// <summary>DSH Web UI 监听端口，默认值为 3080。</summary>
@@ -253,11 +323,16 @@ namespace DSH4VS.UI
                         DshContextAutoSync.Start(extensibility, clientContext, output);
                         await SynchronizeContextAsync(output, cancellationToken);
                     }
+                    else
+                    {
+                        ActiveContextState = ContextStateDisabled;
+                    }
 
                     await ShowBrowserAsync();
                 }
                 else
                 {
+                    ActiveContextState = ContextStateDisabled;
                     Detail = TryGetWebPort(out _)
                         ? "如果 dsh web 尚未运行，请点击下方按钮启动。"
                         : "端口号无效，请输入 1 到 65535 之间的整数。";
@@ -357,6 +432,10 @@ namespace DSH4VS.UI
                     DshContextAutoSync.Start(extensibility, clientContext, output);
                     await SynchronizeContextAsync(output, cancellationToken);
                 }
+                else
+                {
+                    ActiveContextState = ContextStateDisabled;
+                }
 
                 var actualPort = await DshRunner.StartWebAsync(
                     new CompositeOutput(output, AppendWebOutput), port, AutoLoadPlugin);
@@ -372,6 +451,7 @@ namespace DSH4VS.UI
                 else
                 {
                     DshContextAutoSync.Stop();
+                    ActiveContextState = ContextStateDisabled;
                     Detail = "启动失败。请确认 Node.js 和 DSH 已安装后重试。";
                     AppendWebOutput("[DSH] 启动失败。请确认 Node.js 和 DSH 已安装后重试。");
                 }
@@ -397,18 +477,24 @@ namespace DSH4VS.UI
             try
             {
                 var output = await OutputPane.GetAsync(extensibility, cancellationToken);
-                if (DshRunner.StopWeb())
+                var port = int.TryParse(WebPort, out var configuredPort)
+                    ? configuredPort
+                    : DshRunner.WebPort;
+                if (DshRunner.StopWeb(port))
                 {
                     DshContextAutoSync.Stop();
                     output.WriteLine("[DSH] DSH Web UI 已停止。");
                     BrowserVisibility = Visibility.Collapsed;
                     OverlayVisibility = Visibility.Visible;
                     WebProcessId = "进程 ID：未知";
+                    ActiveContextStatus = "活动上下文：尚未同步";
+                    ActiveContextState = ContextStateDisabled;
                     Detail = "DSH Web UI 已停止，可再次点击按钮启动。";
                 }
                 else
                 {
                     DshContextAutoSync.Stop();
+                    ActiveContextState = ContextStateDisabled;
                     Detail = "当前 Web UI 不是由本扩展启动，无法自动停止。";
                 }
             }
@@ -449,14 +535,40 @@ namespace DSH4VS.UI
         {
             try
             {
-                await DshContextBridge.SyncAsync(
+                var context = await DshContextBridge.SyncAsync(
                     extensibility, clientContext, cancellationToken);
+                ActiveContextStatus = FormatContextStatus(context);
+                ActiveContextState = ContextStateConnected;
                 output.WriteLine("[DSH] 已在启动 Web UI 前自动同步 Visual Studio 上下文。");
             }
             catch (Exception ex)
             {
+                ActiveContextStatus = "活动上下文：同步失败";
+                ActiveContextState = ContextStateNotConnected;
                 output.WriteLine("[DSH] 自动同步 Visual Studio 上下文失败，继续启动 Web UI：" + ex.Message);
             }
+        }
+
+        /// <summary>将捕获的 Visual Studio 上下文转换为状态栏文本。</summary>
+        /// <param name="context">当前活动上下文。</param>
+        /// <returns>适合显示在工具窗口底部的上下文摘要。</returns>
+        private static string FormatContextStatus(DSHAskContext context)
+        {
+            if (context == null || string.IsNullOrWhiteSpace(context.FilePath))
+            {
+                return "活动上下文：无活动文档";
+            }
+
+            var position = context.CursorLine > 0 && context.CursorColumn > 0
+                ? $" | 行 {context.CursorLine}，列 {context.CursorColumn}"
+                : string.Empty;
+            var selection = string.IsNullOrEmpty(context.SelectionText)
+                ? string.Empty
+                : " | 已选中 " + context.SelectionText.Length + " 个字符";
+            var details = string.IsNullOrWhiteSpace(context.ClientContextDetails)
+                ? string.Empty
+                : " | " + context.ClientContextDetails;
+            return $"活动上下文：{context.FilePath}{position}{selection}{details}";
         }
 
         /// <summary>将异常写入 DSH 输出窗格。</summary>

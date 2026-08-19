@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Extensibility;
-using Microsoft.VisualStudio.Extensibility.Editor;
 using Microsoft.VisualStudio.ProjectSystem.Query;
 
 namespace DSH4VS.Core
@@ -24,6 +23,9 @@ namespace DSH4VS.Core
 
         /// <summary>当前活动文件路径。</summary>
         public string FilePath { get; set; }
+
+        /// <summary>Visual Studio Shell 客户端上下文键和值的诊断摘要。</summary>
+        public string ClientContextDetails { get; set; }
 
         /// <summary>当前编辑器中的选中文本。</summary>
         public string SelectionText { get; set; }
@@ -85,12 +87,26 @@ namespace DSH4VS.Core
             // 活动文件
             try
             {
-                ctx.FilePath = context[ClientContextKey.Shell.ActiveSelectionPath]
-                    ?? context[ClientContextKey.Shell.ActiveEditorFileName];
-                if (string.IsNullOrEmpty(ctx.FilePath))
-                {
-                    ctx.FilePath = (await extensibility.Editor().GetActiveTextViewAsync(context, cancellationToken))?.FilePath;
-                }
+                var selectionUri = ReadContextValue(context, ClientContextKey.Shell.ActiveSelectionUri);
+                var selectionPath = ReadContextValue(context, ClientContextKey.Shell.ActiveSelectionPath);
+                var selectionFileName = ReadContextValue(context, ClientContextKey.Shell.ActiveSelectionFileName);
+                var editorContentType = ReadContextValue(context, ClientContextKey.Shell.ActiveEditorContentType);
+                var editorFileName = ReadContextValue(context, ClientContextKey.Shell.ActiveEditorFileName);
+                var normalizedSelectionPath = NormalizeFilePath(selectionPath);
+                var normalizedSelectionUri = NormalizeFilePath(selectionUri);
+                ctx.FilePath = !string.IsNullOrWhiteSpace(normalizedSelectionPath)
+                    ? normalizedSelectionPath
+                    : !string.IsNullOrWhiteSpace(normalizedSelectionUri)
+                        ? normalizedSelectionUri
+                    : !string.IsNullOrWhiteSpace(editorFileName)
+                        ? editorFileName
+                        : selectionFileName;
+                ctx.ClientContextDetails = string.Join(" | ",
+                    "活动选择 URI=" + FormatContextValue(selectionUri),
+                    "活动选择路径=" + FormatContextValue(selectionPath),
+                    "活动选择文件名=" + FormatContextValue(selectionFileName),
+                    "编辑器内容类型=" + FormatContextValue(editorContentType),
+                    "编辑器文件名=" + FormatContextValue(editorFileName));
             }
             catch
             {
@@ -100,52 +116,54 @@ namespace DSH4VS.Core
             // 包含活动文件的项目（目录向上查找项目文件）
             ctx.ProjectPath = FindProjectPath(ctx.FilePath);
 
-            // 选中文本
+            return ctx;
+        }
+
+        /// <summary>读取一个 Visual Studio 客户端上下文值；读取失败时返回空值。</summary>
+        /// <param name="context">Visual Studio 客户端上下文。</param>
+        /// <param name="key">需要读取的上下文键。</param>
+        /// <returns>上下文值；不可用时为空字符串。</returns>
+        private static string ReadContextValue(IClientContext context, ClientContextKey key)
+        {
             try
             {
-                var textView = await extensibility.Editor().GetActiveTextViewAsync(context, cancellationToken);
-                var selection = textView?.Selection;
-                if (selection != null)
-                {
-                    var primarySelection = selection.Value;
-                    var cursor = primarySelection.Start;
-                    var line = cursor.GetContainingLine();
-                    ctx.CursorLine = line.LineNumber + 1;
-                    ctx.CursorColumn = cursor - line.Text.Start + 1;
-                    ctx.CurrentLineText = CopyToString(line.Text);
-                    if (!primarySelection.IsEmpty)
-                    {
-                        ctx.SelectionText = CopyToString(primarySelection.Extent);
-                    }
-                }
+                return context[key];
             }
             catch
             {
-                // 仅光标或无选中文本
+                return string.Empty;
+            }
+        }
+
+        /// <summary>为诊断文本标记空上下文值。</summary>
+        /// <param name="value">上下文值。</param>
+        /// <returns>实际值或空值标记。</returns>
+        private static string FormatContextValue(string value)
+        {
+            return string.IsNullOrEmpty(value) ? "&lt;empty&gt;" : value;
+        }
+
+        /// <summary>将客户端上下文中的文件 URI 或路径转换为本地文件路径。</summary>
+        /// <param name="value">文件 URI 或路径。</param>
+        /// <returns>本地文件路径；无法转换时返回空值。</returns>
+        private static string NormalizeFilePath(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return string.Empty;
             }
 
-            return ctx;
+            if (Uri.TryCreate(value, UriKind.Absolute, out var uri) && uri.IsFile)
+            {
+                return uri.LocalPath;
+            }
+
+            return value;
         }
 
         #endregion
 
         #region 路径辅助
-
-        /// <summary>
-        /// 将指定文本范围复制为字符串；复制失败时返回空值。
-        /// </summary>
-        /// <param name="range">需要复制的文本范围。</param>
-        private static string CopyToString(TextRange range)
-        {
-            try
-            {
-                return TextExtensions.CopyToString(range);
-            }
-            catch
-            {
-                return null;
-            }
-        }
 
         /// <summary>
         /// 从指定文件所在目录开始向上查找项目文件。
