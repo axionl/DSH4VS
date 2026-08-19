@@ -17,3 +17,17 @@
 ## 验证状态
 
 已验证：启用自定义插件后，`get_visual_studio_context` 可以成功获取当前活动文档及其内容。
+
+## 使用截图
+
+### 初始化插件
+
+![初始化插件](InitializePreview.png)
+
+### 同步活动文档
+
+![同步活动文档](SyncActiveDocuments.png)
+
+### 使用活动文档上下文
+
+![使用活动文档上下文](UseActiveDocuments.png)

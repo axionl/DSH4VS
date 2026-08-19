@@ -42,7 +42,7 @@
 		         CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" />
 
 		<!-- 部署产物：编译生成的 index.js 与插件元数据。 -->
-		<Content Include="DshPlugin\index.js;DshPlugin\package.json;DshPlugin\cordis.patch.yml"
+		<Content Include="DshPlugin\index.js;DshPlugin\package.json"
 		         CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	</ItemGroup>
 
