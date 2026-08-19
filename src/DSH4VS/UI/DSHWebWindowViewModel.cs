@@ -568,7 +568,8 @@ namespace DSH4VS.UI
             var details = string.IsNullOrWhiteSpace(context.ClientContextDetails)
                 ? string.Empty
                 : " | " + context.ClientContextDetails;
-            return $"活动上下文：{context.FilePath}{position}{selection}{details}";
+            var displayPath = context.FilePath.Replace("\\\\", "\\");
+            return $"活动上下文：{displayPath}{position}{selection}{details}";
         }
 
         /// <summary>将异常写入 DSH 输出窗格。</summary>

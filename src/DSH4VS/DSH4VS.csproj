@@ -14,6 +14,7 @@
 		<VssdkCompatibleExtension>false</VssdkCompatibleExtension>
 		<DeployExtension>true</DeployExtension>
 		<IncludeExtensionHostReferencesInVSIXContainer>false</IncludeExtensionHostReferencesInVSIXContainer>
+		<TypeScriptSourceMap>false</TypeScriptSourceMap>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -25,6 +26,7 @@
 		<PackageReference Include="MahApps.Metro.IconPacks.Material" Version="5.0.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="System.Management" Version="10.0.7" />
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="7.0.1" PrivateAssets="all" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -34,7 +36,14 @@
 
 	<ItemGroup>
 		<TypeScriptCompile Remove="DshPlugin\**\*.ts" />
-		<Content Include="DshPlugin\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+
+		<!-- TypeScript 源与配置：仅用于 MSBuild 的 TS 编译发现，不部署到输出。 -->
+		<Content Include="DshPlugin\index.ts;DshPlugin\tsconfig.json"
+		         CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" />
+
+		<!-- 部署产物：编译生成的 index.js 与插件元数据。 -->
+		<Content Include="DshPlugin\index.js;DshPlugin\package.json;DshPlugin\cordis.patch.yml"
+		         CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	</ItemGroup>
 
 </Project>

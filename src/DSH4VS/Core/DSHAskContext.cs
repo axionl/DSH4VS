@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Extensibility;
+using Microsoft.VisualStudio.Extensibility.Editor;
 using Microsoft.VisualStudio.ProjectSystem.Query;
 
 namespace DSH4VS.Core
@@ -113,6 +114,43 @@ namespace DSH4VS.Core
                 // 无活动文档
             }
 
+            // 编辑器选区和光标
+            try
+            {
+                var textView = await extensibility.Editor().GetActiveTextViewAsync(
+                    context, cancellationToken);
+                if (textView != null)
+                {
+                    var selection = textView.Selection;
+                    if (!selection.IsEmpty)
+                    {
+                        var selectedRange = new TextRange(
+                            textView.Document,
+                            selection.Start.Offset,
+                            selection.End.Offset - selection.Start.Offset);
+                        var selectedChars = new char[selectedRange.Length];
+                        selectedRange.CopyTo(selectedChars);
+                        ctx.SelectionText = new string(selectedChars);
+                    }
+
+                    ctx.FilePath = string.IsNullOrWhiteSpace(ctx.FilePath)
+                        ? textView.FilePath
+                        : ctx.FilePath;
+                    ctx.CursorLine = textView.Document.GetLineNumberFromPosition(
+                        selection.ActivePosition.Offset) + 1;
+                    var currentLine = textView.Document.GetLineFromPosition(
+                        selection.ActivePosition.Offset);
+                    ctx.CursorColumn = 0;
+                    var currentLineChars = new char[currentLine.Text.Length];
+                    currentLine.Text.CopyTo(currentLineChars);
+                    ctx.CurrentLineText = new string(currentLineChars);
+                }
+            }
+            catch
+            {
+                // 编辑器视图不可用时保留 Shell 上下文
+            }
+
             // 包含活动文件的项目（目录向上查找项目文件）
             ctx.ProjectPath = FindProjectPath(ctx.FilePath);
 
@@ -140,7 +178,9 @@ namespace DSH4VS.Core
         /// <returns>实际值或空值标记。</returns>
         private static string FormatContextValue(string value)
         {
-            return string.IsNullOrEmpty(value) ? "&lt;empty&gt;" : value;
+            return string.IsNullOrEmpty(value)
+                ? "&lt;empty&gt;"
+                : value.Replace("\\\\", "\\");
         }
 
         /// <summary>将客户端上下文中的文件 URI 或路径转换为本地文件路径。</summary>

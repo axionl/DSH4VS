@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Extensibility;
@@ -271,8 +272,22 @@ namespace DSH4VS.Commands
         {
             try
             {
-                await SyncContextAsync(context, cancellationToken,
-                    forceSelection ? "选中文本" : "当前上下文");
+                var output = await OutputPane.GetAsync(context.Extensibility, cancellationToken);
+                DshContextBridge.Start(output);
+                var askContext = await DshContextBridge.SyncAsync(
+                    context.Extensibility, context, cancellationToken);
+                DshWebWindowViewModel.ReportContextSyncResult(
+                    askContext, null, forceSelection ? "选中文本" : "当前上下文");
+
+                if (forceSelection && !string.IsNullOrWhiteSpace(askContext.SelectionText))
+                {
+                    var task = BuildSelectionTask(askContext);
+                    using var taskCts = CancellationTokenSource.CreateLinkedTokenSource(
+                        cancellationToken);
+                    await DshRunner.RunTaskAsync(
+                        output, task, askContext.WorkspaceRoot, taskCts);
+                }
+
                 DshWebToolWindow.SetClientContext(context);
                 await context.Extensibility.Shell().ShowToolWindowAsync<DshWebToolWindow>(
                     activate: true, cancellationToken);
@@ -280,6 +295,48 @@ namespace DSH4VS.Commands
             catch (Exception ex)
             {
                 await LogAsync(context, ex);
+            }
+        }
+
+        /// <summary>构造包含活动文档信息和选中内容的自动提问任务。</summary>
+        /// <param name="context">已同步的 Visual Studio 上下文。</param>
+        /// <returns>提交给 DSH 的任务文本。</returns>
+        private static string BuildSelectionTask(DSHAskContext context)
+        {
+            var filePath = string.IsNullOrWhiteSpace(context.FilePath)
+                ? "（未知文件）"
+                : context.FilePath;
+            var fileContent = string.IsNullOrWhiteSpace(context.FilePath)
+                ? string.Empty
+                : ReadFileContent(context.FilePath);
+
+            return "请分析下面 Visual Studio 活动文档中的选中内容，并给出清晰、可执行的回答。"
+                + Environment.NewLine + Environment.NewLine
+                + "活动文档：" + filePath
+                + Environment.NewLine + "完整文档内容："
+                + Environment.NewLine + "```"
+                + Environment.NewLine + fileContent
+                + Environment.NewLine + "```"
+                + Environment.NewLine + "选中内容："
+                + Environment.NewLine + "```"
+                + Environment.NewLine + context.SelectionText
+                + Environment.NewLine + "```";
+        }
+
+        /// <summary>读取活动文档的当前磁盘内容，读取失败时返回提示文本。</summary>
+        /// <param name="filePath">活动文档路径。</param>
+        /// <returns>文档内容。</returns>
+        private static string ReadFileContent(string filePath)
+        {
+            try
+            {
+                return !string.IsNullOrWhiteSpace(filePath) && File.Exists(filePath)
+                    ? File.ReadAllText(filePath)
+                    : "（无法读取当前文档的磁盘内容；文档可能尚未保存。）";
+            }
+            catch (Exception ex)
+            {
+                return "（无法读取当前文档：" + ex.Message + "）";
             }
         }
 
