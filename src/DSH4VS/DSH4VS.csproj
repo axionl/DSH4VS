@@ -13,7 +13,7 @@
 
 		<!-- VisualStudio.Extensibility 进程外扩展相关属性 -->
 		<VssdkCompatibleExtension>false</VssdkCompatibleExtension>
-		<DeployExtension>true</DeployExtension>
+		<DeployExtension>false</DeployExtension>
 		<IncludeExtensionHostReferencesInVSIXContainer>false</IncludeExtensionHostReferencesInVSIXContainer>
 		<TypeScriptSourceMap>false</TypeScriptSourceMap>
 	</PropertyGroup>

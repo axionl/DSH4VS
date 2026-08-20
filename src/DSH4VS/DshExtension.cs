@@ -19,7 +19,7 @@ internal sealed class DshExtension : Extension
     {
         Metadata = new ExtensionMetadata(
             "DSH4VS",
-            new Version(1, 0, 0),
+            new Version(1, 1, 0),
             "Ariel AxionL (i@axionl.me)",
             "DSH for Visual Studio",
             "在 Visual Studio 中运行 DSH headless 任务并打开 DSH Web UI。")
