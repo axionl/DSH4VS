@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using Dte = EnvDTE.DTE;
+using Microsoft.VisualStudio.Shell;
 
 namespace DSH4VS.Core
 {
@@ -28,6 +29,7 @@ namespace DSH4VS.Core
         /// <returns>已打开文档的轻量快照。</returns>
         public static IReadOnlyList<DSHOpenDocument> Read()
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             var documents = new List<DSHOpenDocument>();
             foreach (var progId in new[] { "VisualStudio.DTE.18.0", "VisualStudio.DTE.17.0" })
             {
@@ -77,6 +79,8 @@ namespace DSH4VS.Core
         /// <returns>已运行的 DTE；不存在时返回空值。</returns>
         private static Dte GetRunningDte(string progId)
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             if (GetRunningObjectTable(0, out var table) != 0)
             {
                 return null;

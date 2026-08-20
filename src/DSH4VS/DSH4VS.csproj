@@ -21,6 +21,7 @@
 		<PackageReference Include="Microsoft.VisualStudio.Extensibility" Version="17.14.2098" />
 		<PackageReference Include="Microsoft.VisualStudio.Extensibility.Build" Version="17.14.40608" PrivateAssets="all" />
 		<PackageReference Include="Microsoft.VisualStudio.Extensibility.Sdk" Version="17.14.40608" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.VisualStudio.Shell.15.0" Version="17.13.40008" PrivateAssets="all" />
 		<PackageReference Include="EnvDTE" Version="17.14.40260" />
 		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4129.50" />
 		<PackageReference Include="HandyControl" Version="3.5.1" />
