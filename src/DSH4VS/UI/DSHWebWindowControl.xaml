@@ -247,6 +247,11 @@
                                       ToolTip="选择临时 npm 镜像地址"
                                       Style="{StaticResource DshComboBoxStyle}"/>
                         </Grid>
+                        <TextBox Text="{Binding InstallCommand, Mode=OneWay}" IsReadOnly="True"
+                                 Margin="0,0,0,8" Padding="8,4"
+                                 TextWrapping="Wrap" VerticalContentAlignment="Center"
+                                 ToolTip="「安装 DSH」将执行的命令"
+                                 Style="{StaticResource DshTextBoxStyle}"/>
                         <TextBlock Text="{Binding EnvironmentStatus}" Margin="0,4,0,8"
                                     TextWrapping="Wrap"/>
                         <Grid>

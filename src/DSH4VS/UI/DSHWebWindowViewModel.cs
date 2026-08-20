@@ -63,7 +63,9 @@ namespace DSH4VS.UI
 
         private string activeContextState = ContextStateDisabled;
 
-        private bool globalDshInstall;
+        private bool globalDshInstall = true;
+
+        private string installCommand = "npm install -g @deepseek-ai/dsh@latest";
 
         private ObservableCollection<string> dshTags = new ObservableCollection<string> { "latest", "next" };
 
@@ -237,7 +239,21 @@ namespace DSH4VS.UI
         public bool GlobalDshInstall
         {
             get => globalDshInstall;
-            set => SetProperty(ref globalDshInstall, value);
+            set
+            {
+                if (SetProperty(ref globalDshInstall, value))
+                {
+                    UpdateInstallCommand();
+                }
+            }
+        }
+
+        /// <summary>将执行的 DSH CLI 安装命令（随全局/tag/镜像选择实时更新）。</summary>
+        [DataMember]
+        public string InstallCommand
+        {
+            get => installCommand;
+            private set => SetProperty(ref installCommand, value);
         }
 
         /// <summary>DSH CLI 可选 npm 发布 tag 列表。</summary>
@@ -253,7 +269,13 @@ namespace DSH4VS.UI
         public string DshTag
         {
             get => dshTag;
-            set => SetProperty(ref dshTag, value);
+            set
+            {
+                if (SetProperty(ref dshTag, value))
+                {
+                    UpdateInstallCommand();
+                }
+            }
         }
 
         /// <summary>可选的临时 npm 镜像地址列表。</summary>
@@ -269,7 +291,13 @@ namespace DSH4VS.UI
         public int NpmRegistryIndex
         {
             get => npmRegistryIndex;
-            set => SetProperty(ref npmRegistryIndex, value);
+            set
+            {
+                if (SetProperty(ref npmRegistryIndex, value))
+                {
+                    UpdateInstallCommand();
+                }
+            }
         }
 
         #endregion
@@ -669,6 +697,24 @@ namespace DSH4VS.UI
             var port = GetWebPortOrDefault();
             WebAddress = DshRunner.GetWebUrl(port);
             WebCommand = $"npx --yes @deepseek-ai/dsh web --port {port}";
+        }
+
+        /// <summary>根据全局安装、tag 和镜像选择刷新安装命令。</summary>
+        private void UpdateInstallCommand()
+        {
+            var tag = string.Equals(DshTag, "next", StringComparison.OrdinalIgnoreCase)
+                ? "next"
+                : "latest";
+            var registry = NpmRegistryIndex >= 0 && NpmRegistryIndex < NpmRegistries.Count
+                ? NpmRegistries[NpmRegistryIndex]
+                : null;
+            var packageSpec = "@deepseek-ai/dsh@" + tag;
+            var registryArguments = string.IsNullOrWhiteSpace(registry)
+                ? string.Empty
+                : " --registry " + DshLocator.Quote(registry);
+            InstallCommand = GlobalDshInstall
+                ? "npm install -g" + registryArguments + " " + packageSpec
+                : "npx --yes" + registryArguments + " " + packageSpec + " --help";
         }
 
         /// <summary>在单线程单元线程上写入系统剪贴板。</summary>
