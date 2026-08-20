@@ -27,11 +27,10 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      - name: Restore
-        run: dotnet restore DSH4VS.sln
-
       - name: Build VSIX
-        run: dotnet build src/DSH4VS/DSH4VS.csproj --configuration Release --no-restore
+        shell: pwsh
+        run: |
+          msbuild src/DSH4VS/DSH4VS.csproj /restore /p:Configuration=Release /p:DeployExtension=false
 
       - name: Collect VSIX
         shell: pwsh
