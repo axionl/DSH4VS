@@ -4,6 +4,7 @@
 		<TargetFramework>net8.0-windows</TargetFramework>
 		<RootNamespace>DSH4VS</RootNamespace>
 		<AssemblyName>DeepSeekForVisualStudio</AssemblyName>
+		<Version>1.1.0</Version>
 		<UseWPF>true</UseWPF>
 		<LangVersion>latest</LangVersion>
 		<Nullable>disable</Nullable>
