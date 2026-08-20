@@ -68,7 +68,6 @@ namespace DSH4VS.Core
         private static Process currentProcess;
         private static CancellationTokenSource currentCts;
         private static Process webProcess;
-        private static string pluginPatchPath;
         private static int webPort = WebPort;
 
         static DshRunner()
@@ -204,34 +203,30 @@ namespace DSH4VS.Core
         /// </summary>
         /// <param name="output">输出通道。</param>
         /// <param name="port">Web UI 监听端口。</param>
-        /// <param name="autoLoadPlugin">是否通过 patch 自动加载 Visual Studio Harness 插件。</param>
-        public static async Task<int> StartWebAsync(IDshOutput output, int port = WebPort,
-            bool autoLoadPlugin = true)
+        public static async Task<int> StartWebAsync(IDshOutput output, int port = WebPort)
         {
-            if (autoLoadPlugin)
+            DshContextBridge.Start(output);
+            if (port == DshContextBridge.Port)
             {
-                DshContextBridge.Start(output);
-                if (port == DshContextBridge.Port)
+                port = FindAvailableWebPort(port + 1);
+                if (port == 0)
                 {
-                    port = FindAvailableWebPort(port + 1);
-                    if (port == 0)
-                    {
-                        output.WriteLine("[DSH] 无法为 Web UI 找到不与上下文桥接冲突的端口。");
-                        return 0;
-                    }
-
-                    output.WriteLine($"[DSH] Web UI 端口与上下文桥接端口冲突，已切换到 {port}。");
-                }
-
-                if (!TryCreatePluginPatch(output, out var patchPath))
-                {
-                    output.WriteLine("[DSH] Visual Studio Harness patch 创建失败，已取消 Web UI 启动。");
                     DshContextBridge.Stop();
+                    output.WriteLine("[DSH] 无法为 Web UI 找到不与上下文桥接冲突的端口。");
                     return 0;
                 }
 
-                pluginPatchPath = patchPath;
+                output.WriteLine($"[DSH] Web UI 端口与上下文桥接端口冲突，已切换到 {port}。");
             }
+
+            RemoveLegacyProfile(output);
+            if (!EnsurePluginCopied(output))
+            {
+                output.WriteLine("[DSH] Visual Studio Harness 插件复制失败，已取消 Web UI 启动。");
+                DshContextBridge.Stop();
+                return 0;
+            }
+
             if (await IsWebUpAsync(port))
             {
                     webPort = port;
@@ -252,9 +247,7 @@ namespace DSH4VS.Core
                 var psi = new ProcessStartInfo
                 {
                     FileName = exe.FileName,
-                    Arguments = exe.ArgumentsPrefix
-                        + (autoLoadPlugin ? " --patch " + QuoteArgument(pluginPatchPath) : string.Empty)
-                        + $" --port {port}",
+                    Arguments = exe.ArgumentsPrefix + $" --port {port}",
                     WorkingDirectory = Environment.CurrentDirectory,
                     UseShellExecute = false,
                     CreateNoWindow = true,
@@ -304,39 +297,29 @@ namespace DSH4VS.Core
             return 0;
         }
 
-        /// <summary>创建通过 patch 覆盖层加载本地插件所需的 cordis 配置。</summary>
-        /// <param name="output">用于记录创建过程的输出通道。</param>
-        /// <param name="patchPath">输出的 patch 文件路径。</param>
-        /// <returns>如果 patch 创建成功，则返回 <see langword="true" />。</returns>
-        private static bool TryCreatePluginPatch(IDshOutput output, out string patchPath)
+        /// <summary>将本地插件复制到默认 Web profile 的插件目录。</summary>
+        /// <param name="output">用于记录复制过程的输出通道。</param>
+        /// <returns>如果插件复制成功，则返回 <see langword="true" />。</returns>
+        private static bool EnsurePluginCopied(IDshOutput output)
         {
-            patchPath = null;
-            var pluginPath = Path.Combine(GetBundlePath(), "index.js");
-            if (!File.Exists(pluginPath))
+            var source = GetBundlePath();
+            var target = Path.Combine(GetProfileDirectory("web"), "plugins", "dsh4vs-visual-studio-context");
+            if (!File.Exists(Path.Combine(source, "index.js")))
             {
-                output.WriteLine("[DSH] 未找到本地 Harness 插件入口: " + pluginPath);
+                output.WriteLine("[DSH] 未找到本地 Harness 插件入口: " + Path.Combine(source, "index.js"));
                 return false;
             }
 
             try
             {
-                pluginPath = Path.GetFullPath(pluginPath);
-                patchPath = Path.Combine(Path.GetTempPath(), "DSH4VS", "cordis.patch.yml");
-                Directory.CreateDirectory(Path.GetDirectoryName(patchPath));
-                var yamlPluginPath = pluginPath.Replace("'", "''");
-                File.WriteAllText(patchPath,
-                    "- insert:\r\n"
-                    + "    - id: dsh4vs-visual-studio-context\r\n"
-                    + $"      name: '{yamlPluginPath}'\r\n"
-                    + "      config:\r\n"
-                    + "        bridgeUrl: 'http://127.0.0.1:13091/api/visual-studio/context'\r\n"
-                    + "        timeoutMs: 2000\r\n");
-                output.WriteLine("[DSH] 已创建本地插件 patch，保留现有 profile: " + patchPath);
+                Directory.CreateDirectory(target);
+                CopyDirectoryContents(source, target, overwrite: true);
+                output.WriteLine("[DSH] 已复制本地插件到 Web profile 插件目录: " + target);
                 return true;
             }
             catch (Exception ex)
             {
-                output.WriteLine("[DSH] 创建 Harness patch 失败: " + ex.Message);
+                output.WriteLine("[DSH] 复制 Harness 插件失败: " + ex.Message);
                 return false;
             }
         }
@@ -350,11 +333,64 @@ namespace DSH4VS.Core
                 "DshPlugin");
         }
 
-        /// <summary>生成适用于 Windows 进程参数的带引号路径。</summary>
-        /// <param name="value">需要转义的路径。</param>
-        private static string QuoteArgument(string value)
+        /// <summary>删除旧版本创建的 dsh4vs profile。</summary>
+        /// <param name="output">用于记录清理过程的输出通道。</param>
+        private static void RemoveLegacyProfile(IDshOutput output)
         {
-            return "\"" + value.Replace("\"", "\\\"") + "\"";
+            var directory = GetProfileDirectory("dsh4vs");
+            if (!Directory.Exists(directory))
+            {
+                return;
+            }
+
+            try
+            {
+                Directory.Delete(directory, recursive: true);
+                output.WriteLine("[DSH] 已删除旧的 dsh4vs profile。");
+            }
+            catch (Exception ex)
+            {
+                output.WriteLine("[DSH] 删除旧的 dsh4vs profile 失败: " + ex.Message);
+            }
+        }
+
+        /// <summary>解析指定的 DSH profile 目录。</summary>
+        /// <param name="profileName">profile 名称。</param>
+        /// <returns>profile 目录的绝对路径。</returns>
+        private static string GetProfileDirectory(string profileName)
+        {
+            var home = Environment.GetEnvironmentVariable("DSH_HOME");
+            if (string.IsNullOrWhiteSpace(home))
+            {
+                home = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                    ".dsh");
+            }
+
+            return Path.Combine(home, "profiles", profileName);
+        }
+
+        /// <summary>把源目录的全部内容复制到目标目录。</summary>
+        /// <param name="sourceDir">源目录。</param>
+        /// <param name="targetDir">目标目录。</param>
+        /// <param name="overwrite">是否覆盖已存在的目标文件。</param>
+        private static void CopyDirectoryContents(string sourceDir, string targetDir, bool overwrite)
+        {
+            foreach (var directory in Directory.GetDirectories(sourceDir, "*", SearchOption.AllDirectories))
+            {
+                Directory.CreateDirectory(directory.Replace(sourceDir, targetDir));
+            }
+
+            foreach (var file in Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories))
+            {
+                var target = file.Replace(sourceDir, targetDir);
+                if (File.Exists(target) && !overwrite)
+                {
+                    continue;
+                }
+
+                File.Copy(file, target, overwrite: true);
+            }
         }
 
         /// <summary>输出外部进程文本，并对空白输出进行忽略。</summary>

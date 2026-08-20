@@ -116,10 +116,6 @@
                         <Button Grid.Column="4" Command="{Binding CopyWebCommand}"
                                 Content="复制命令" Style="{StaticResource DshButtonStyle}"/>
                     </Grid>
-                    <CheckBox Grid.Row="4" IsChecked="{Binding AutoLoadPlugin}"
-                              Content="自动加载 Visual Studio Harness 插件"
-                              HorizontalAlignment="Left"
-                              ToolTip="启动 DSH Web UI 时自动安装并加载本地 Visual Studio 插件"/>
                     <StackPanel Grid.Row="6">
                         <TextBlock Text="运行环境：" FontWeight="SemiBold"/>
                         <TextBlock Text="{Binding EnvironmentStatus}" Margin="0,4,0,8"

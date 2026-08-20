@@ -4,7 +4,7 @@
 
 ## Visual Studio 上下文插件
 
-扩展会将本地插件 `dsh4vs-visual-studio-context` 安装到 DSH 的 `dsh4vs` profile，并注册工具：
+扩展会将本地插件 `dsh4vs-visual-studio-context` 复制到 DSH Web profile 的插件目录，由 DSH 自动加载并注册工具：
 
 - `get_visual_studio_context`：读取最近一次从 Visual Studio 同步的上下文。
 - `mode: active_document`：返回解决方案、项目、当前文件路径和文件内容。

@@ -51,8 +51,6 @@ namespace DSH4VS.UI
 
         private string webOutput = "等待启动 DSH Web UI…";
 
-        private bool autoLoadPlugin = true;
-
         private string webProcessId = "进程 ID：未知";
 
         private string dshPath = "检查中…";
@@ -84,7 +82,7 @@ namespace DSH4VS.UI
             this.extensibility = extensibility;
             this.clientContext = clientContext ?? latestClientContext;
             latestInstance = this;
-            activeContextState = (autoLoadPlugin && this.clientContext != null)
+            activeContextState = this.clientContext != null
                 ? ContextStateNotConnected
                 : ContextStateDisabled;
             StartWebCommand = new AsyncCommand(StartWebAsync);
@@ -120,23 +118,6 @@ namespace DSH4VS.UI
         {
             get => activeContextState;
             private set => SetProperty(ref activeContextState, value);
-        }
-
-        /// <summary>是否在启动 Web UI 时自动安装并加载 Visual Studio Harness 插件。</summary>
-        [DataMember]
-        public bool AutoLoadPlugin
-        {
-            get => autoLoadPlugin;
-            set
-            {
-                if (SetProperty(ref autoLoadPlugin, value))
-                {
-                    UpdateWebConfiguration();
-                    ActiveContextState = value
-                        ? ContextStateNotConnected
-                        : ContextStateDisabled;
-                }
-            }
         }
 
         /// <summary>更新工具窗口复用时使用的最新 Visual Studio 客户端上下文。</summary>
@@ -317,7 +298,7 @@ namespace DSH4VS.UI
                 var output = await OutputPane.GetAsync(extensibility, cancellationToken);
                 if (TryGetWebPort(out var port) && await DshRunner.IsWebUpAsync(port))
                 {
-                    if (AutoLoadPlugin && clientContext != null)
+                    if (clientContext != null)
                     {
                         DshContextBridge.Start(output);
                         DshContextAutoSync.Start(extensibility, clientContext, output);
@@ -426,7 +407,7 @@ namespace DSH4VS.UI
 
                 UpdateWebConfiguration();
                 var output = await OutputPane.GetAsync(extensibility, cancellationToken);
-                if (AutoLoadPlugin && clientContext != null)
+                if (clientContext != null)
                 {
                     DshContextBridge.Start(output);
                     DshContextAutoSync.Start(extensibility, clientContext, output);
@@ -438,7 +419,7 @@ namespace DSH4VS.UI
                 }
 
                 var actualPort = await DshRunner.StartWebAsync(
-                    new CompositeOutput(output, AppendWebOutput), port, AutoLoadPlugin);
+                    new CompositeOutput(output, AppendWebOutput), port);
                 if (actualPort > 0)
                 {
                     if (actualPort != port)
@@ -622,9 +603,7 @@ namespace DSH4VS.UI
         {
             var port = GetWebPortOrDefault();
             WebAddress = DshRunner.GetWebUrl(port);
-            WebCommand = AutoLoadPlugin
-                ? $"npx --yes @deepseek-ai/dsh --profile dsh4vs --port {port}"
-                : $"npx --yes @deepseek-ai/dsh web --port {port}";
+            WebCommand = $"npx --yes @deepseek-ai/dsh web --port {port}";
         }
 
         /// <summary>在单线程单元线程上写入系统剪贴板。</summary>
