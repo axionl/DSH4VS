@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
@@ -60,6 +62,22 @@ namespace DSH4VS.UI
         private string activeContextStatus = "活动上下文：尚未同步";
 
         private string activeContextState = ContextStateDisabled;
+
+        private bool globalDshInstall;
+
+        private ObservableCollection<string> dshTags = new ObservableCollection<string> { "latest", "next" };
+
+        private string dshTag = "latest";
+
+        private ObservableCollection<string> npmRegistries = new ObservableCollection<string>
+        {
+            "https://registry.npmjs.org/",
+            "https://registry.npmmirror.com/",
+            "https://mirrors.cloud.tencent.com/npm/",
+            "https://mirrors.huaweicloud.com/repository/npm/",
+        };
+
+        private int npmRegistryIndex;
 
         private readonly VisualStudioExtensibility extensibility;
 
@@ -214,6 +232,46 @@ namespace DSH4VS.UI
             set => SetProperty(ref dshVersion, value);
         }
 
+        /// <summary>是否使用 npm 全局安装（-g）DSH CLI。</summary>
+        [DataMember]
+        public bool GlobalDshInstall
+        {
+            get => globalDshInstall;
+            set => SetProperty(ref globalDshInstall, value);
+        }
+
+        /// <summary>DSH CLI 可选 npm 发布 tag 列表。</summary>
+        [DataMember]
+        public ObservableCollection<string> DshTags
+        {
+            get => dshTags;
+            set => SetProperty(ref dshTags, value);
+        }
+
+        /// <summary>当前选中的 DSH CLI npm 发布 tag。</summary>
+        [DataMember]
+        public string DshTag
+        {
+            get => dshTag;
+            set => SetProperty(ref dshTag, value);
+        }
+
+        /// <summary>可选的临时 npm 镜像地址列表。</summary>
+        [DataMember]
+        public ObservableCollection<string> NpmRegistries
+        {
+            get => npmRegistries;
+            set => SetProperty(ref npmRegistries, value);
+        }
+
+        /// <summary>当前选中的 npm 镜像地址在列表中的索引。</summary>
+        [DataMember]
+        public int NpmRegistryIndex
+        {
+            get => npmRegistryIndex;
+            set => SetProperty(ref npmRegistryIndex, value);
+        }
+
         #endregion
 
         #region 可绑定属性
@@ -359,7 +417,10 @@ namespace DSH4VS.UI
         private async Task InstallDshAsync(object parameter, CancellationToken cancellationToken)
         {
             EnvironmentStatus = "正在通过 npx 安装 @deepseek-ai/dsh，请稍候…";
-            var error = await DshLocator.InstallDshAsync();
+            var registry = NpmRegistryIndex >= 0 && NpmRegistryIndex < NpmRegistries.Count
+                ? NpmRegistries[NpmRegistryIndex]
+                : null;
+            var error = await DshLocator.InstallDshAsync(GlobalDshInstall, DshTag, registry);
             if (!string.IsNullOrWhiteSpace(error))
             {
                 EnvironmentStatus = error;

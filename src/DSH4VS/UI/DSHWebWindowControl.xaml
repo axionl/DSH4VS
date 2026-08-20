@@ -285,6 +285,8 @@
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="16"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Text="DSH Web UI" VerticalAlignment="Center"
                            FontWeight="SemiBold"/>
@@ -292,7 +294,11 @@
                            VerticalAlignment="Center"/>
                     <TextBlock Grid.Column="6" Text="{Binding WebProcessId}"
                            VerticalAlignment="Center"/>
-                    <Button Grid.Column="8" Command="{Binding StopWebCommand}"
+                    <TextBlock Grid.Column="8" VerticalAlignment="Center"
+                           ToolTip="DSH Web UI 监听地址">
+                        <Run Text="监听："/><Run Text="{Binding WebAddress, Mode=OneWay}"/>
+                    </TextBlock>
+                    <Button Grid.Column="10" Command="{Binding StopWebCommand}"
                         Content="停止 DSH Web UI" Style="{StaticResource DshButtonStyle}"/>
                 </Grid>
             </ScrollViewer>
