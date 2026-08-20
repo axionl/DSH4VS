@@ -108,6 +108,7 @@ namespace DSH4VS.Core
                 available = !string.IsNullOrWhiteSpace(askContext.FilePath),
                 solutionPath = askContext.SolutionPath,
                 projectPath = askContext.ProjectPath,
+                openedDocuments = askContext.OpenedDocuments ?? Array.Empty<DSHOpenDocument>(),
                 filePath = askContext.FilePath,
                 fileContent,
                 selectionText = askContext.SelectionText,

@@ -535,11 +535,15 @@ namespace DSH4VS.UI
         /// <returns>适合显示在工具窗口底部的上下文摘要。</returns>
         private static string FormatContextStatus(DSHAskContext context)
         {
-            if (context == null || string.IsNullOrWhiteSpace(context.FilePath))
+            if (context == null || (string.IsNullOrWhiteSpace(context.FilePath)
+                && (context.OpenedDocuments == null || context.OpenedDocuments.Count == 0)))
             {
                 return "活动上下文：无活动文档";
             }
 
+            var openedDocuments = context.OpenedDocuments == null || context.OpenedDocuments.Count == 0
+                ? string.Empty
+                : $" | 已打开 {context.OpenedDocuments.Count} 个文档";
             var position = context.CursorLine > 0 && context.CursorColumn > 0
                 ? $" | 行 {context.CursorLine}，列 {context.CursorColumn}"
                 : string.Empty;

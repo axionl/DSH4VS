@@ -25,6 +25,103 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="DshComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Foreground" Value="#263238"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#B0BEC5"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <Border x:Name="ComboBorder" CornerRadius="5"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="28"/>
+                                    </Grid.ColumnDefinitions>
+                                    <ContentPresenter Grid.Column="0" Margin="{TemplateBinding Padding}"
+                                                      VerticalAlignment="Center"
+                                                      Content="{TemplateBinding SelectionBoxItem}"
+                                                      ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                      TextElement.Foreground="{TemplateBinding Foreground}"/>
+                                    <ToggleButton Grid.Column="1" Focusable="False"
+                                                  IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                                                  ClickMode="Press"
+                                                  Background="Transparent" BorderThickness="0">
+                                        <TextBlock Text="⌄" FontSize="14" Foreground="RoyalBlue" Padding="0, 0, 0, 6"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </ToggleButton>
+                                </Grid>
+                            </Border>
+                            <Popup IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   Placement="Bottom" AllowsTransparency="True"
+                                   Focusable="False" PopupAnimation="Slide">
+                                <Border MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
+                                        Margin="0,2,0,0" Padding="2"
+                                        Background="White" BorderBrush="RoyalBlue"
+                                        BorderThickness="1" CornerRadius="5">
+                                    <ScrollViewer MaxHeight="240">
+                                        <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                <Setter TargetName="ComboBorder" Property="BorderBrush" Value="RoyalBlue"/>
+                            </Trigger>
+                            <Trigger Property="IsDropDownOpen" Value="True">
+                                <Setter TargetName="ComboBorder" Property="BorderBrush" Value="RoyalBlue"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="DshCheckBoxStyle" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="#263238"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#B0BEC5"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Border x:Name="CheckBoxBorder" CornerRadius="5"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center">
+                                <TextBlock x:Name="CheckMark" Text="✓" Width="16"
+                                           TextAlignment="Center"
+                                           Foreground="RoyalBlue" FontWeight="Bold"
+                                           Visibility="Collapsed"/>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="CheckBoxBorder" Property="BorderBrush" Value="RoyalBlue"/>
+                                <Setter TargetName="CheckBoxBorder" Property="Background" Value="White"/>
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="CheckBoxBorder" Property="BorderBrush" Value="RoyalBlue"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style x:Key="DshTextBoxStyle" TargetType="TextBox">
             <Setter Property="Template">
                 <Setter.Value>
@@ -97,7 +194,7 @@
                              VerticalScrollBarVisibility="Auto"
                              ToolTip="DSH Web UI 启动输出"
                              Style="{StaticResource DshTextBoxStyle}"/>
-                    <Grid Grid.Row="2">
+                    <Grid Grid.Row="4">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="16"/>
@@ -118,6 +215,38 @@
                     </Grid>
                     <StackPanel Grid.Row="6">
                         <TextBlock Text="运行环境：" FontWeight="SemiBold"/>
+                        <Grid Margin="0,8,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <CheckBox IsChecked="{Binding GlobalDshInstall}"
+                                      Style="{StaticResource DshCheckBoxStyle}"
+                                      Grid.Column="0"
+                                      VerticalAlignment="Center"
+                                      ToolTip="使用 npm install -g 安装 DSH CLI"/>
+                            <TextBlock Text="全局使用 DSH" Grid.Column="1" Margin="6,0,16,0"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock Text="Tag：" Grid.Column="2" Margin="0,0,4,0"
+                                       VerticalAlignment="Center"/>
+                            <ComboBox ItemsSource="{Binding DshTags}"
+                                      SelectedItem="{Binding DshTag}"
+                                      Grid.Column="3"
+                                      Style="{StaticResource DshComboBoxStyle}"
+                                      Width="88" Padding="4,2"
+                                      ToolTip="选择 DSH CLI 的 npm 发布 tag"/>
+                            <TextBlock Text="镜像：" Grid.Column="4" Margin="12,0,4,0"
+                                       VerticalAlignment="Center"/>
+                            <ComboBox Grid.Column="5" ItemsSource="{Binding NpmRegistries}"
+                                      SelectedIndex="{Binding NpmRegistryIndex}"
+                                      MinWidth="148" Padding="4,2"
+                                      ToolTip="选择临时 npm 镜像地址"
+                                      Style="{StaticResource DshComboBoxStyle}"/>
+                        </Grid>
                         <TextBlock Text="{Binding EnvironmentStatus}" Margin="0,4,0,8"
                                     TextWrapping="Wrap"/>
                         <Grid>
@@ -136,12 +265,6 @@
                                     Margin="4,0,0,0" HorizontalAlignment="Stretch"
                                     Style="{StaticResource DshButtonStyle}"/>
                         </Grid>
-                        <TextBlock Text="DSH 路径：" Margin="0,8,0,4"
-                                   FontWeight="SemiBold"/>
-                        <TextBox Text="{Binding DshPath}" IsReadOnly="True"
-                                 Padding="8,4" VerticalContentAlignment="Center"
-                                 ToolTip="DSH 命令可执行程序或脚本的所在位置"
-                                 Style="{StaticResource DshTextBoxStyle}"/>
                     </StackPanel>
                 </Grid>
             </Grid>
@@ -165,8 +288,6 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Text="DSH Web UI" VerticalAlignment="Center"
                            FontWeight="SemiBold"/>
-                    <TextBlock Grid.Column="2" Text="{Binding WebAddress}"
-                           VerticalAlignment="Center"/>
                     <TextBlock Grid.Column="4" Text="{Binding DshVersion}"
                            VerticalAlignment="Center"/>
                     <TextBlock Grid.Column="6" Text="{Binding WebProcessId}"

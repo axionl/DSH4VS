@@ -9,7 +9,7 @@ export const Config = Schema.object({
   timeoutMs: Schema.number().default(2000),
 })
 
-type Mode = 'active_document' | 'cursor_position'
+type Mode = 'active_document' | 'opened_documents' | 'cursor_position'
 
 interface PluginConfig {
   bridgeUrl: string
@@ -21,12 +21,19 @@ interface VisualStudioSnapshot {
   message?: string
   solutionPath?: string
   projectPath?: string
+  openedDocuments?: OpenedDocument[]
   filePath?: string
   fileContent?: string | null
   cursorLine?: number
   cursorColumn?: number
   currentLineText?: string
   selectionText?: string
+}
+
+interface OpenedDocument {
+  filePath?: string
+  name?: string
+  isActive?: boolean
 }
 
 interface ToolArgs {
@@ -46,8 +53,8 @@ export function apply(ctx: ToolContext, config: PluginConfig) {
     parameters: {
       mode: {
         type: 'string',
-        description: '使用 active_document 获取活动文件和内容，使用 cursor_position 获取光标、选区和当前行。',
-        enum: ['active_document', 'cursor_position'],
+        description: '使用 active_document 获取活动文件和内容，使用 opened_documents 获取所有已打开文档，使用 cursor_position 获取光标、选区和当前行。',
+        enum: ['active_document', 'opened_documents', 'cursor_position'],
       },
     },
     output: {
@@ -80,8 +87,16 @@ export function apply(ctx: ToolContext, config: PluginConfig) {
           return JSON.stringify({
             solutionPath: snapshot.solutionPath,
             projectPath: snapshot.projectPath,
+            openedDocuments: snapshot.openedDocuments ?? [],
             filePath: snapshot.filePath,
             fileContent: snapshot.fileContent,
+          }, null, 2)
+        }
+
+        if (mode === 'opened_documents') {
+          return JSON.stringify({
+            solutionPath: snapshot.solutionPath,
+            openedDocuments: snapshot.openedDocuments ?? [],
           }, null, 2)
         }
 
@@ -95,7 +110,7 @@ export function apply(ctx: ToolContext, config: PluginConfig) {
           }, null, 2)
         }
 
-        return `读取 Visual Studio 上下文失败：未知的 mode "${String(mode)}"，仅支持 active_document 或 cursor_position。`
+        return `读取 Visual Studio 上下文失败：未知的 mode "${String(mode)}"，仅支持 active_document、opened_documents 或 cursor_position。`
       } catch (error) {
         if (timeoutController.signal.aborted && !exec?.signal?.aborted) {
           return `读取 Visual Studio 上下文失败：桥接服务在 ${timeoutMs} 毫秒内没有响应。`

@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.Extensibility;
@@ -143,6 +144,9 @@ namespace DSH4VS.Core
                     currentExtensibility, currentContext, cancellationToken);
                 var fingerprint = string.Join("\u001f",
                     context.FilePath,
+                    context.SolutionPath,
+                    string.Join("\u001e", (context.OpenedDocuments ?? Array.Empty<DSHOpenDocument>())
+                        .Select(document => string.Join("\u001d", document.FilePath, document.Name, document.IsActive))),
                     context.CursorLine,
                     context.CursorColumn,
                     context.SelectionText,

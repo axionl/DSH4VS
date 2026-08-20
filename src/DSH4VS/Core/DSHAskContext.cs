@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -39,6 +40,9 @@ namespace DSH4VS.Core
 
         /// <summary>当前主光标所在行的文本。</summary>
         public string CurrentLineText { get; set; }
+
+        /// <summary>当前 Visual Studio 中已经打开的文档集合。</summary>
+        public IReadOnlyList<DSHOpenDocument> OpenedDocuments { get; set; }
 
         /// <summary>DSH 使用的工作目录（其 cwd）。</summary>
         public string WorkspaceRoot
@@ -153,6 +157,7 @@ namespace DSH4VS.Core
 
             // 包含活动文件的项目（目录向上查找项目文件）
             ctx.ProjectPath = FindProjectPath(ctx.FilePath);
+            ctx.OpenedDocuments = DshOpenDocumentReader.Read();
 
             return ctx;
         }

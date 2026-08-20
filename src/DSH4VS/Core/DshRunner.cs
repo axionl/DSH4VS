@@ -11,7 +11,7 @@ namespace DSH4VS.Core
 {
     /// <summary>
     /// 运行 DSH CLI：使用 headless profile 执行一次性 Agent 任务，
-    /// 使用 `dsh web --port 13080` 启动嵌入式 Web UI。标准输出和标准错误
+    /// 使用 `dsh web --no-open --port 13080` 启动嵌入式 Web UI。标准输出和标准错误
     /// 会流式写入 Visual Studio 的“DSH”输出窗格，任务支持取消。
     /// </summary>
     public static class DshRunner
@@ -247,7 +247,7 @@ namespace DSH4VS.Core
                 var psi = new ProcessStartInfo
                 {
                     FileName = exe.FileName,
-                    Arguments = exe.ArgumentsPrefix + $" --port {port}",
+                    Arguments = exe.ArgumentsPrefix + $" --no-open --port {port}",
                     WorkingDirectory = Environment.CurrentDirectory,
                     UseShellExecute = false,
                     CreateNoWindow = true,

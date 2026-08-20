@@ -172,28 +172,62 @@ namespace DSH4VS.Core
             return status;
         }
 
-        /// <summary>
-        /// 通过 npx 下载并安装 DSH CLI。
-        /// </summary>
+        /// <summary>安装指定 tag 的 DSH CLI。</summary>
+        /// <param name="globalInstall">是否使用 npm 全局安装。</param>
+        /// <param name="tag">npm 发布 tag，仅支持 latest 或 next。</param>
+        /// <param name="registry">可选的 npm 镜像地址。</param>
         /// <returns>安装错误信息；安装成功时返回空值。</returns>
-        public static async Task<string> InstallDshAsync()
+        public static async Task<string> InstallDshAsync(bool globalInstall = false,
+            string tag = "latest", string registry = null)
         {
-            var npx = FindNpxPath();
-            if (npx == null)
-                return "未找到 npx，请先安装 Node.js。";
+            tag = string.Equals(tag, "next", StringComparison.OrdinalIgnoreCase)
+                ? "next"
+                : "latest";
+            var packageSpec = "@deepseek-ai/dsh@" + tag;
+            registry = registry?.Trim();
+            if (!string.IsNullOrEmpty(registry)
+                && (!Uri.TryCreate(registry, UriKind.Absolute, out var registryUri)
+                    || (registryUri.Scheme != Uri.UriSchemeHttp && registryUri.Scheme != Uri.UriSchemeHttps)))
+            {
+                return "npm 镜像地址无效，请输入 http:// 或 https:// 地址。";
+            }
 
-            var result = await RunProcessAsync(npx, "--yes @deepseek-ai/dsh --help");
+            var registryArguments = string.IsNullOrEmpty(registry)
+                ? string.Empty
+                : " --registry " + Quote(registry);
+            ProcessResult result;
+
+            if (globalInstall)
+            {
+                var npm = FindNpmPath();
+                if (npm == null)
+                    return "未找到 npm，请先安装 Node.js。";
+
+                result = await RunProcessAsync(npm, "install -g" + registryArguments + " " + packageSpec);
+            }
+            else
+            {
+                var npx = FindNpxPath();
+                if (npx == null)
+                    return "未找到 npx，请先安装 Node.js。";
+
+                result = await RunProcessAsync(npx, "--yes" + registryArguments + " " + packageSpec + " --help");
+            }
+
             if (result.ExitCode != 0)
             {
                 var detail = string.IsNullOrWhiteSpace(result.Error)
                     ? result.Output
                     : result.Error;
-                return "npx 安装 DSH 失败：" + detail.Trim();
+                return (globalInstall ? "npm 全局安装 DSH 失败：" : "npx 安装 DSH 失败：")
+                    + detail.Trim();
             }
 
             return Locate() != null
                 ? null
-                : "npx 已执行，但未能定位安装后的 dsh。请检查 npm 缓存或 PATH。";
+                : (globalInstall
+                    ? "npm 已执行，但未能定位安装后的 dsh。请检查 npm 全局 bin PATH。"
+                    : "npx 已执行，但未能定位安装后的 dsh。请检查 npm 缓存或 PATH。");
         }
 
         /// <summary>
@@ -481,6 +515,14 @@ namespace DSH4VS.Core
             return FindOnPath("npx.cmd")
                 ?? FindOnPath("npx.exe")
                 ?? FindInDirectories("npx.cmd", GetNodeDirectories());
+        }
+
+        /// <summary>查找 npm 命令路径。</summary>
+        private static string FindNpmPath()
+        {
+            return FindOnPath("npm.cmd")
+                ?? FindOnPath("npm.exe")
+                ?? FindInDirectories("npm.cmd", GetNodeDirectories());
         }
 
         /// <summary>获取常见的 Node.js 安装目录。</summary>
