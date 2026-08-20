@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
@@ -120,6 +121,11 @@ namespace DSH4VS.UI
             get => environmentStatus;
             private set => SetProperty(ref environmentStatus, value);
         }
+
+        /// <summary>显示当前 DSH4VS 扩展版本。</summary>
+        [DataMember]
+        public string ExtensionVersion => "DSH4VS 扩展版本："
+            + (Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "未知");
 
         /// <summary>显示当前 Visual Studio 活动文件、光标位置和选中文本状态。</summary>
         [DataMember]
