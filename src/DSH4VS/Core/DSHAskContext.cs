@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.Extensibility;
 using Microsoft.VisualStudio.Extensibility.Editor;
 using Microsoft.VisualStudio.ProjectSystem.Query;
-using Microsoft.VisualStudio.Shell;
 
 namespace DSH4VS.Core
 {
@@ -159,7 +158,6 @@ namespace DSH4VS.Core
             // 包含活动文件的项目（目录向上查找项目文件）
             ctx.ProjectPath = FindProjectPath(ctx.FilePath);
 
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
             ctx.OpenedDocuments = DshOpenDocumentReader.Read();
 
             return ctx;
