@@ -112,6 +112,7 @@ namespace DSH4VS.UI
             CheckEnvironmentCommand = new AsyncCommand(CheckEnvironmentAsync);
             InstallNodeCommand = new AsyncCommand(InstallNodeAsync);
             InstallDshCommand = new AsyncCommand(InstallDshAsync);
+            UpdateWebConfiguration();
         }
 
         /// <summary>显示 Node.js、npx 和 DSH CLI 的环境检测结果。</summary>
@@ -250,6 +251,7 @@ namespace DSH4VS.UI
                 if (SetProperty(ref globalDshInstall, value))
                 {
                     UpdateInstallCommand();
+                    UpdateWebConfiguration();
                 }
             }
         }
@@ -702,7 +704,9 @@ namespace DSH4VS.UI
         {
             var port = GetWebPortOrDefault();
             WebAddress = DshRunner.GetWebUrl(port);
-            WebCommand = $"npx --yes @deepseek-ai/dsh web --port {port}";
+            WebCommand = GlobalDshInstall
+                ? $"dsh web --port {port}"
+                : $"npx --yes @deepseek-ai/dsh web --port {port}";
         }
 
         /// <summary>根据全局安装、tag 和镜像选择刷新安装命令。</summary>
